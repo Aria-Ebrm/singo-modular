@@ -111,8 +111,6 @@ class ProductFeaturesModule extends AbstractModule {
 			return;
 		}
 
-		wp_enqueue_script( 'jquery-ui-sortable' );
-
 		$css_path = $this->get_path( 'assets/css/product-features-repeater.css' );
 		$css_ver  = file_exists( $css_path ) ? (string) filemtime( $css_path ) : SINGO_TOOLS_VERSION;
 		wp_enqueue_style(
@@ -127,7 +125,7 @@ class ProductFeaturesModule extends AbstractModule {
 		wp_enqueue_script(
 			'singo-product-features-repeater',
 			$this->get_url( 'assets/js/product-features-repeater.js' ),
-			array( 'jquery', 'jquery-ui-sortable' ),
+			array( 'jquery' ),
 			$js_ver,
 			true
 		);

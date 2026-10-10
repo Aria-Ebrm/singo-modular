@@ -88,44 +88,81 @@
       // Enhance existing items
       setupRepeaterItems($container);
 
-      // Enable Drag & Drop with jQuery UI Sortable (Zero Glitch & Zero Jumping)
-      if ($.fn.sortable) {
-        $container.sortable({
-          handle: '.singo-drag-handle',
-          items: '> .optionino-repeater-item',
-          axis: 'y',
-          cursor: 'grabbing',
-          opacity: 0.95,
-          tolerance: 'pointer',
-          forcePlaceholderSize: true,
-          forceHelperSize: true,
-          appendTo: 'body', // Append helper directly to body to avoid flex container & scroll jumping
-          helper: function(e, item) {
-            var $clone = item.clone();
-            $clone.css({
-              'width': item.outerWidth() + 'px',
-              'box-sizing': 'border-box',
-              'z-index': 999999
-            });
-            return $clone;
-          },
-          placeholder: 'optionino-repeater-item singo-sortable-placeholder',
-          start: function(e, ui) {
-            ui.placeholder.css({
-              'height': ui.item.outerHeight() + 'px',
-              'box-sizing': 'border-box',
-              'visibility': 'visible',
-              'margin-bottom': '10px'
-            });
-            ui.item.css('opacity', '0.25');
-          },
-          stop: function(e, ui) {
-            ui.item.css('opacity', '1');
-            reindexRepeater($container);
-            triggerRepeaterChange($field[0]);
-          }
-        });
+      // Enable 100% Native HTML5 Drag & Drop (Zero Glitch, Zero RTL jumping, Native Compositor)
+      initHTML5DragAndDrop($container, $field);
+    });
+  }
+
+  function initHTML5DragAndDrop($container, $field) {
+    var draggedItem = null;
+
+    // Enable draggable ONLY when mouse is pressed on drag handle
+    $container.on('mousedown', '.singo-drag-handle', function() {
+      var $item = $(this).closest('.optionino-repeater-item');
+      $item.attr('draggable', 'true');
+    });
+
+    $container.on('mouseup mouseleave', '.singo-drag-handle', function() {
+      var $item = $(this).closest('.optionino-repeater-item');
+      if (!$item.hasClass('is-dragging')) {
+        $item.removeAttr('draggable');
       }
+    });
+
+    $container.on('dragstart', '.optionino-repeater-item', function(e) {
+      draggedItem = this;
+      var dt = e.originalEvent.dataTransfer;
+      if (dt) {
+        dt.effectAllowed = 'move';
+        dt.setData('text/plain', ''); // Required for Firefox compatibility
+      }
+
+      var self = this;
+      setTimeout(function() {
+        $(self).addClass('is-dragging');
+      }, 0);
+    });
+
+    // Handle dragover on container to allow drop
+    $container.on('dragover', function(e) {
+      e.preventDefault();
+      if (e.originalEvent.dataTransfer) {
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+      }
+    });
+
+    // Real-time slot displacement on item hover
+    $container.on('dragover', '.optionino-repeater-item', function(e) {
+      e.preventDefault();
+      if (e.originalEvent.dataTransfer) {
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+      }
+
+      if (!draggedItem || draggedItem === this) {
+        return;
+      }
+
+      var rect = this.getBoundingClientRect();
+      var midY = rect.top + rect.height / 2;
+      var clientY = e.originalEvent.clientY;
+
+      if (clientY < midY) {
+        if (this.previousElementSibling !== draggedItem) {
+          this.parentNode.insertBefore(draggedItem, this);
+        }
+      } else {
+        if (this.nextElementSibling !== draggedItem) {
+          this.parentNode.insertBefore(draggedItem, this.nextSibling);
+        }
+      }
+    });
+
+    $container.on('dragend', '.optionino-repeater-item', function() {
+      $(this).removeAttr('draggable').removeClass('is-dragging');
+      draggedItem = null;
+
+      reindexRepeater($container);
+      triggerRepeaterChange($field[0]);
     });
   }
 
