@@ -238,240 +238,57 @@ class Singo_Tools_Optionino {
 	}
 
 	/**
-	 * Set up settings tabs and fields.
+	 * Set up settings tabs and fields dynamically from self-contained modules.
 	 */
-	private static function set_tabs() {
-		// Shamsi Date Settings Tab
-		$shamsi_fields = array(
-			array(
-				'id'      => 'master_switch',
-				'type'    => 'switcher',
-				'title'   => 'فعال‌سازی تبدیل تاریخ شمسی',
-				'desc'    => 'با خاموش کردن این گزینه، تمام قابلیت‌های تبدیل تاریخ غیرفعال شده و تاریخ‌ها به میلادی برمی‌گردند.',
-				'default' => true,
-			),
-			array(
-				'id'      => 'enable_frontend',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل تاریخ در بخش کاربری (فرانت‌اند)',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'enable_admin',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل تاریخ در پیشخوان (ادمین)',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'convert_digits',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل اعداد انگلیسی به فارسی',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'default_format',
-				'type'    => 'select',
-				'title'   => 'فرمت پیش‌فرض تاریخ',
-				'options' => array(
-					'Y/m/d'      => '1402/05/24 (Y/m/d)',
-					'j F Y'      => '24 مرداد 1402 (j F Y)',
-					'l, j F Y'   => 'سه‌شنبه, 24 مرداد 1402 (l, j F Y)',
-					'Y/m/d H:i'  => '1402/05/24 15:30 (Y/m/d H:i)',
-				),
-				'default' => 'Y/m/d',
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'enable_rest_ajax',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل تاریخ در پاسخ‌های REST API / AJAX',
-				'default' => false,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			),
-		);
+	private static function set_tabs(): void {
+		$modules = \SingoTools\Core\ModuleManager::get_instance()->get_all_modules();
 
-		if ( class_exists( 'WooCommerce' ) ) {
-			$shamsi_fields[] = array(
-				'id'      => 'enable_woocommerce',
-				'type'    => 'switcher',
-				'title'   => 'فعال‌سازی تبدیل تاریخ در ووکامرس',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			);
-			$shamsi_fields[] = array(
-				'id'      => 'wc_order_emails',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل تاریخ در ایمیل‌های سفارش ووکامرس',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-					array( 'enable_woocommerce', '==', true ),
-				),
-			);
-			$shamsi_fields[] = array(
-				'id'      => 'wc_admin_orders',
-				'type'    => 'switcher',
-				'title'   => 'تبدیل تاریخ در جدول سفارشات (پیشخوان ووکامرس)',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-					array( 'enable_woocommerce', '==', true ),
+		$tabs               = array();
+		$other_tools_fields = array();
+
+		// Collect dedicated tabs and other_tools fields from discovered modules
+		foreach ( $modules as $module ) {
+			if ( $module::is_other_tool() ) {
+				$fields = $module->get_optionino_fields();
+				if ( ! empty( $fields ) && is_array( $fields ) ) {
+					foreach ( $fields as $field ) {
+						$other_tools_fields[] = $field;
+					}
+				}
+			} else {
+				$tab = $module->get_optionino_tab();
+				if ( ! empty( $tab ) && is_array( $tab ) ) {
+					$order  = $module::get_order();
+					$tabs[] = array(
+						'order' => $order,
+						'tab'   => $tab,
+					);
+				}
+			}
+		}
+
+		// Sort dedicated tabs strictly by their designated order
+		usort( $tabs, function ( array $a, array $b ): int {
+			return $a['order'] <=> $b['order'];
+		} );
+
+		// Rule 1 & 2: Other Tools must be strictly LAST, and must be completely omitted if empty
+		if ( ! empty( $other_tools_fields ) ) {
+			$tabs[] = array(
+				'order' => PHP_INT_MAX,
+				'tab'   => array(
+					'id'     => 'other_tools',
+					'title'  => 'سایر امکانات',
+					'desc'   => 'فعال‌سازی و مدیریت ابزارها و قابلیت‌های تکمیلی جعبه ابزار سینگو.',
+					'icon'   => 'dashicons-admin-generic',
+					'fields' => $other_tools_fields,
 				),
 			);
 		}
 
-		if ( did_action( 'elementor/loaded' ) ) {
-			$shamsi_fields[] = array(
-				'id'      => 'enable_elementor',
-				'type'    => 'switcher',
-				'title'   => 'فعال‌سازی تبدیل تاریخ در المنتور',
-				'default' => true,
-				'require' => array(
-					array( 'master_switch', '==', true ),
-				),
-			);
-		}
-
-		OPTNNO::set_tab( 'singo_tools_options', array(
-			'id'     => 'shamsi_settings',
-			'title'  => 'تنظیمات تاریخ شمسی',
-			'desc'   => 'تبدیل هوشمند تاریخ‌های میلادی به شمسی در پیشخوان، فرانت‌اند و ایمیل‌ها.',
-			'icon'   => 'dashicons-calendar-alt',
-			'fields' => $shamsi_fields,
-		) );
-
-		// Currency Converter Tab
-		$currency_fields = array(
-			array(
-				'id'      => 'enable_currency_converter',
-				'type'    => 'switcher',
-				'title'   => 'فعال‌سازی دستیار ارزی ووکامرس',
-				'desc'    => 'با خاموش کردن این گزینه، تمام قیمت‌ها به تومان برگردانده شده و دستیار ارزی غیرفعال می‌شود.',
-				'default' => false,
-			),
-			array(
-				'id'      => 'rate_usd',
-				'type'    => 'number',
-				'title'   => 'نرخ دلار (USD) به تومان',
-				'default' => '1',
-				'require' => array(
-					array( 'enable_currency_converter', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'rate_eur',
-				'type'    => 'number',
-				'title'   => 'نرخ یورو (EUR) به تومان',
-				'default' => '1',
-				'require' => array(
-					array( 'enable_currency_converter', '==', true ),
-				),
-			),
-			array(
-				'id'      => 'rate_cny',
-				'type'    => 'number',
-				'title'   => 'نرخ یوان چین (CNY) به تومان',
-				'default' => '1',
-				'require' => array(
-					array( 'enable_currency_converter', '==', true ),
-				),
-			),
-		);
-
-		if ( class_exists( 'WooCommerce' ) ) {
-			OPTNNO::set_tab( 'singo_tools_options', array(
-				'id'     => 'currency_settings',
-				'title'  => 'دستیار ارزی',
-				'desc'   => 'مدیریت و تبدیل نرخ ارزهای خارجی (دلار، یورو و یوان) به تومان در ووکامرس.',
-				'icon'   => 'dashicons-money-alt',
-				'fields' => $currency_fields,
-			) );
-		}
-
-
-
-		// Product Features Custom Interactive Tab
-		if ( file_exists( SINGO_TOOLS_PATH . 'modules/product-features/views/admin-groups-view.php' ) ) {
-			OPTNNO::set_tab( 'singo_tools_options', array(
-				'id'    => 'product_features',
-				'title' => 'گروه‌بندی ویژگی‌ها',
-				'desc'  => 'دسته‌بندی، اولویت‌بندی و نمایش اختصاصی ویژگی‌های محصولات با شورت‌کد.',
-				'icon'  => 'dashicons-list-view',
-				'file'  => SINGO_TOOLS_PATH . 'modules/product-features/views/admin-groups-view.php',
-			) );
-		}
-
-		// Other Tools Tab (سایر امکانات)
-		$other_tools_fields = array(
-			array(
-				'id'      => 'enable_product_priority',
-				'type'    => 'switcher',
-				'title'   => 'اولویت محصولات برجسته',
-				'desc'    => 'امکان امتیازدهی ۱ تا ۵ ستاره به محصولات در جدول مدیریت و صفحه ویرایش محصول، و نمایش اولویت‌دار محصولات در آرشیوها و فروشگاه بر اساس امتیاز.',
-				'default' => false,
-			),
-			array(
-				'id'      => 'disable_right_click',
-				'type'    => 'switcher',
-				'title'   => 'غیرفعال‌سازی کلیک راست و انتخاب متن',
-				'desc'    => 'جلوگیری از کلیک راست (Context Menu) و انتخاب متون در فرانت‌اند سایت جهت محافظت از محتوا.',
-				'default' => false,
-			),
-			array(
-				'id'      => 'custom_variable_price_format',
-				'type'    => 'switcher',
-				'title'   => 'قیمت محصولات متغیر',
-				'desc'    => 'تغییر فرمت نمایش قیمت محصولات متغیر از بازه قیمتی به ساختار «از [کمترین قیمت]».',
-				'default' => false,
-			),
-			array(
-				'id'      => 'enable_product_swatches',
-				'type'    => 'switcher',
-				'title'   => 'سواچ محصولات رنگی',
-				'desc'    => 'فعال‌سازی سیستم انتخاب سواچ رنگی و دکمه‌ای برای ویژگی‌های محصولات متغیر در ووکامرس.',
-				'default' => false,
-			),
-			array(
-				'id'      => 'enable_product_thumbnail_features',
-				'type'    => 'switcher',
-				'title'   => 'ویژگی بند انگشتی محصولات',
-				'desc'    => 'فعال‌سازی شورت‌کد [product_features_boxes limit="4"] برای نمایش باکس‌های ویژگی بندانگشتی همراه با تصویر در صفحه محصول.',
-				'default' => false,
-			),
-		);
-
-		OPTNNO::set_tab( 'singo_tools_options', array(
-			'id'     => 'other_tools',
-			'title'  => 'سایر امکانات',
-			'desc'   => 'فعال‌سازی و مدیریت ابزارها و قابلیت‌های تکمیلی جعبه ابزار سینگو.',
-			'icon'   => 'dashicons-admin-generic',
-			'fields' => $other_tools_fields,
-		) );
-
-		// Price List PDF Export Custom Interactive Tab
-		if ( class_exists( 'WooCommerce' ) && file_exists( SINGO_TOOLS_PATH . 'modules/price-list/views/admin-price-list-view.php' ) ) {
-			OPTNNO::set_tab( 'singo_tools_options', array(
-				'id'    => 'price_list_pdf',
-				'title' => 'خروجی لیست قیمت (PDF)',
-				'desc'  => 'تولید و دانلود مستقیم لیست قیمت محصولات ووکامرس در قالب استاندارد PDF بر اساس دسته‌بندی با تاریخ روز شمسی و لوگو.',
-				'icon'  => 'dashicons-media-document',
-				'file'  => SINGO_TOOLS_PATH . 'modules/price-list/views/admin-price-list-view.php',
-			) );
+		// Register tabs in Optionino
+		foreach ( $tabs as $item ) {
+			OPTNNO::set_tab( 'singo_tools_options', $item['tab'] );
 		}
 	}
 }

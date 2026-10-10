@@ -50,6 +50,11 @@ class Singo_Tools_Core {
 			}
 		}
 
+		// Load Modular Infrastructure
+		require_once SINGO_TOOLS_PATH . 'includes/Core/AbstractModule.php';
+		require_once SINGO_TOOLS_PATH . 'includes/Core/ManifestManager.php';
+		require_once SINGO_TOOLS_PATH . 'includes/Core/ModuleManager.php';
+
 		// Load Optionino Framework and Settings strictly in Admin / AJAX
 		if ( is_admin() || wp_doing_ajax() ) {
 			if ( ! class_exists( 'OPTNNO' ) && file_exists( SINGO_TOOLS_PATH . 'optionino/optionino-framework.php' ) ) {
@@ -72,116 +77,32 @@ class Singo_Tools_Core {
 	}
 
 	/**
-	 * Load conditional modules (Shamsi Date, Currency Converter, Product Features).
+	 * Load conditional modules via ModuleManager.
 	 */
 	public function load_modules(): void {
-		// 1. Load Currency Converter Module
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_currency_converter', false ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/currency-converter/class-singo-currency-converter.php';
-			new Singo_Currency_Converter();
-		}
-
-		// 2. Load Shamsi Date Module
-		if ( singo_tools_get_option( 'master_switch', true ) && file_exists( SINGO_TOOLS_PATH . 'modules/shamsi-date/class-singo-shamsi-core.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/shamsi-date/class-singo-shamsi-core.php';
-			Singo_Shamsi_Core::get_instance();
-		}
-
-		// 3. Load Product Features Module
-		if ( file_exists( SINGO_TOOLS_PATH . 'modules/product-features/product-features.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/product-features/product-features.php';
-		}
-		if ( file_exists( SINGO_TOOLS_PATH . 'modules/product-features/class-singo-product-features.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/product-features/class-singo-product-features.php';
-			Singo_Product_Features::get_instance();
-		}
-
-		// 4. Load Product Priority Module
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_product_priority', false ) && file_exists( SINGO_TOOLS_PATH . 'modules/product-priority/class-singo-product-priority.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/product-priority/class-singo-product-priority.php';
-			Singo_Product_Priority::get_instance();
-		}
-
-		// 5. Disable Right Click & Text Selection (Frontend only)
-		if ( ! is_admin() && singo_tools_get_option( 'disable_right_click', false ) ) {
-			add_action( 'wp_footer', array( $this, 'render_disable_right_click' ), 99 );
-		}
-
-		// 6. Custom Variable Product Price Format
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'custom_variable_price_format', false ) ) {
-			add_filter( 'woocommerce_variable_price_html', array( $this, 'format_variable_product_price' ), 99, 2 );
-		}
-
-		// 7. Load Product Swatches Module
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_product_swatches', false ) && file_exists( SINGO_TOOLS_PATH . 'modules/product-swatches/class-singo-product-swatches.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/product-swatches/class-singo-product-swatches.php';
-			Singo_Product_Swatches::get_instance();
-		}
-
-		// 8. Load Product Thumbnail Features Module
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_product_thumbnail_features', false ) && file_exists( SINGO_TOOLS_PATH . 'modules/product-thumbnail-features/class-singo-product-thumbnail-features.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/product-thumbnail-features/class-singo-product-thumbnail-features.php';
-			Singo_Product_Thumbnail_Features::get_instance();
-		}
-
-		// 9. Load Price List PDF Module
-		if ( class_exists( 'WooCommerce' ) && file_exists( SINGO_TOOLS_PATH . 'modules/price-list/class-singo-price-list.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'modules/price-list/class-singo-price-list.php';
-			Singo_Price_List::get_instance();
-		}
+		\SingoTools\Core\ModuleManager::get_instance()->init_active_modules();
 	}
 
 	/**
-	 * Format variable product price display (از ...).
+	 * Legacy proxy for formatting variable product price display (از ...).
 	 */
 	public function format_variable_product_price( string $price, \WC_Product $product ): string {
-		if ( ! method_exists( $product, 'get_variation_price' ) ) {
-			return $price;
+		$module = \SingoTools\Core\ModuleManager::get_instance()->get_module( 'variable-price-format' );
+		if ( $module instanceof \SingoTools\Modules\VariablePriceFormat\VariablePriceFormatModule ) {
+			return $module->format_variable_product_price( $price, $product );
 		}
 
-		// دریافت کمترین و بیشترین قیمت بین متغیرها
-		$min_price_regular = $product->get_variation_regular_price( 'min', true );
-		$min_price_sale    = $product->get_variation_sale_price( 'min', true );
-		$max_price         = $product->get_variation_price( 'max', true );
-		$min_price         = $product->get_variation_price( 'min', true );
-
-		// اگر قیمت تمام متغیرها یکسان باشد، بازه قیمتی اعمال نمی‌شود
-		if ( $min_price === $max_price ) {
-			return $price;
-		}
-
-		// بررسی وجود تخفیف روی کمترین قیمت
-		if ( ! empty( $min_price_sale ) && $min_price_regular !== $min_price_sale ) {
-			$formatted_price = sprintf(
-				'<del>%s</del> <ins>%s</ins>',
-				wc_price( (float) $min_price_regular ),
-				wc_price( (float) $min_price_sale )
-			);
-		} else {
-			$formatted_price = wc_price( (float) $min_price );
-		}
-
-		return sprintf( '%s %s', esc_html__( 'از', 'woocommerce' ), $formatted_price );
+		return $price;
 	}
 
 	/**
-	 * Render right-click and selection prevention script and style in frontend footer.
+	 * Legacy proxy for rendering right-click and selection prevention script and style.
 	 */
 	public function render_disable_right_click(): void {
-		?>
-		<style>
-			body, html {
-				-webkit-user-select: none !important;
-				-ms-user-select: none !important;
-				user-select: none !important;
-			}
-		</style>
-		<script>
-			document.addEventListener('contextmenu', function(e) {
-				e.preventDefault();
-			});
-		</script>
-		<?php
+		$module = \SingoTools\Core\ModuleManager::get_instance()->get_module( 'disable-right-click' );
+		if ( $module instanceof \SingoTools\Modules\DisableRightClick\DisableRightClickModule ) {
+			$module->render_script_and_styles();
+		}
 	}
 
 	/**
@@ -261,6 +182,9 @@ class Singo_Tools_Core {
 		if ( class_exists( 'autoptimizeCache' ) && method_exists( 'autoptimizeCache', 'clearall' ) ) {
 			autoptimizeCache::clearall();
 		}
+
+		// 6. Rebuild Singo Tools Modules Manifest
+		\SingoTools\Core\ManifestManager::rebuild_manifest();
 	}
 
 	/**
