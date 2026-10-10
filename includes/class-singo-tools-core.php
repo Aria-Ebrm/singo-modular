@@ -223,9 +223,6 @@ class Singo_Tools_Core {
 		if ( class_exists( 'autoptimizeCache' ) && method_exists( 'autoptimizeCache', 'clearall' ) ) {
 			autoptimizeCache::clearall();
 		}
-
-		// 6. Rebuild Singo Tools Modules Manifest
-		\SingoTools\Core\ManifestManager::rebuild_manifest();
 	}
 
 	/**
