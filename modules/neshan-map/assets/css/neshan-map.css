@@ -1,0 +1,96 @@
+/**
+ * Singo Tools - Neshan Map Widget Styles
+ */
+
+.singo-neshan-map-container {
+	position: relative;
+	overflow: hidden;
+	box-sizing: border-box;
+	direction: ltr;
+	font-family: inherit !important;
+}
+
+.singo-neshan-map-container a {
+	text-decoration: none !important;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
+
+.singo-neshan-map-container a:hover,
+.singo-neshan-map-container a:active {
+	text-decoration: none !important;
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
+
+.singo-neshan-map-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: #f6f7f7;
+	border: 1.5px dashed #c3c4c7;
+	border-radius: 8px;
+	text-align: center;
+	padding: 24px;
+	box-sizing: border-box;
+	direction: rtl;
+	color: #3c434a;
+	font-family: inherit !important;
+}
+
+.singo-neshan-map-placeholder-icon {
+	width: 42px;
+	height: 42px;
+	margin-bottom: 12px;
+	color: #ad6141;
+}
+
+.singo-neshan-map-placeholder-title {
+	font-weight: 600;
+	font-size: 15px;
+	margin-bottom: 8px;
+	color: #1d2327;
+}
+
+.singo-neshan-map-placeholder-desc {
+	font-size: 13px;
+	color: #646970;
+	line-height: 1.6;
+	max-width: 400px;
+}
+
+.singo-neshan-map-placeholder a {
+	color: #ad6141;
+	text-decoration: underline;
+}
+
+.singo-neshan-map-placeholder a:hover {
+	color: #984f32;
+}
+
+/* Elementor Editor specific tweaks */
+.elementor-editor-active .singo-neshan-map-container {
+	position: relative;
+	z-index: 1;
+}
+
+.singo-neshan-map-icon::after {
+	content: "";
+	background-image: url('../images/neshan.svg');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 24px;
+	height: 24px;
+	display: block;
+	margin: 0 auto;
+}
+
+[data-elementor-type="kit"] .singo-neshan-map-icon::after,
+.elementor-panel-menu-item .singo-neshan-map-icon::after {
+	filter: brightness(0) invert(1);
+}
