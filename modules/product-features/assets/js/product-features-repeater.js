@@ -1,5 +1,5 @@
 /**
- * Singo Tools - Native Optionino Repeater Enhancements
+ * Singo Tools - Product Features Repeater Enhancements (Self-Contained)
  * 
  * Provides:
  * - Drag & Drop reordering via jQuery UI Sortable
@@ -8,7 +8,7 @@
  * - Add / Remove repeater items
  * - Event dispatching for Singo Delta Saving
  * 
- * @package SingoTools
+ * @package SingoTools\Modules\ProductFeatures
  * @since 4.3.0
  */
 
@@ -16,7 +16,7 @@
   'use strict';
 
   function initOptioninoRepeaters() {
-    $('.optionino-repeater-field').each(function() {
+    $('.optionino-repeater-field[data-repeater-name="mu_attribute_groups"]').each(function() {
       var $field = $(this);
       var $container = $field.find('.optionino-repeater-container');
 
@@ -127,7 +127,7 @@
   }
 
   // Handle Add Item Click
-  $(document).on('click', '.optionino-add-repeater-item', function(e) {
+  $(document).on('click', '.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item', function(e) {
     e.preventDefault();
     var $field = $(this).closest('.optionino-repeater-field');
     var $container = $field.find('.optionino-repeater-container');
@@ -161,7 +161,7 @@
   });
 
   // Handle Remove Item Click
-  $(document).on('click', '.optionino-remove-repeater-item', function(e) {
+  $(document).on('click', '.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-remove-repeater-item', function(e) {
     e.preventDefault();
     var $item = $(this).closest('.optionino-repeater-item');
     var $container = $item.closest('.optionino-repeater-container');
@@ -195,7 +195,7 @@
   });
 
   // Handle "Default" Switcher Exclusivity (Single-Choice Radio Behavior)
-  $(document).on('change', '.optionino-repeater-item input[type="checkbox"][name*="is_default"]', function(e) {
+  $(document).on('change', '.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item input[type="checkbox"][name*="is_default"]', function(e) {
     var $currentCheck = $(this);
     var $currentItem = $currentCheck.closest('.optionino-repeater-item');
     var $container = $currentItem.closest('.optionino-repeater-container');

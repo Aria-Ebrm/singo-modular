@@ -172,16 +172,6 @@ class Singo_Tools_Optionino {
 			true
 		);
 
-		wp_enqueue_script( 'jquery-ui-sortable' );
-
-		wp_enqueue_script(
-			'singo-repeater',
-			SINGO_TOOLS_URL . 'assets/js/singo-repeater.js',
-			array( 'jquery', 'jquery-ui-sortable' ),
-			SINGO_TOOLS_VERSION,
-			true
-		);
-
 		$color_picker_js = "
 			jQuery(document).ready(function($) {
 				function initOptioninoColorPickers() {
