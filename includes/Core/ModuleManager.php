@@ -54,13 +54,19 @@ class ModuleManager {
 
 	/**
 	 * Load and instantiate modules from cached manifest.
+	 *
+	 * @param bool $force_reload Whether to force reload modules from manifest.
 	 */
-	public function load_modules(): void {
-		if ( $this->is_loaded ) {
+	public function load_modules( bool $force_reload = false ): void {
+		if ( $this->is_loaded && ! $force_reload ) {
 			return;
 		}
 
-		$manifest = ManifestManager::get_manifest();
+		if ( $force_reload ) {
+			$this->modules = array();
+		}
+
+		$manifest = ManifestManager::get_manifest( $force_reload );
 
 		foreach ( $manifest as $slug => $meta ) {
 			$file  = $meta['file'] ?? '';
@@ -85,6 +91,14 @@ class ModuleManager {
 		}
 
 		$this->is_loaded = true;
+	}
+
+	/**
+	 * Force reload all modules from fresh manifest.
+	 */
+	public function reload_modules(): void {
+		$this->is_loaded = false;
+		$this->load_modules( true );
 	}
 
 	/**
