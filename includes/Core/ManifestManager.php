@@ -22,11 +22,6 @@ class ManifestManager {
 	public const OPTION_KEY = 'singo_tools_modules_manifest';
 
 	/**
-	 * Option key for caching the modules directory modification time.
-	 */
-	public const MTIME_KEY = 'singo_tools_modules_manifest_mtime';
-
-	/**
 	 * In-memory RAM cache for manifest.
 	 *
 	 * @var array<string, array<string, string>>|null
@@ -36,9 +31,9 @@ class ManifestManager {
 	/**
 	 * Get the module manifest with zero disk scanning at runtime.
 	 *
-	 * Zero disk scanning is strictly preserved for regular frontend requests.
-	 * Dynamic invalidation occurs when the modules directory mtime changes,
-	 * when an administrator accesses the settings page, or on explicit refresh.
+	 * Zero disk scanning is strictly preserved: it loads directly from wp_options
+	 * and memory cache. Rebuilding occurs strictly on plugin upgrade/activation
+	 * or explicit settings save.
 	 *
 	 * @param bool $force_refresh Whether to force a disk re-scan and update the cache.
 	 * @return array<string, array<string, string>> Array of discovered modules metadata.
@@ -48,14 +43,7 @@ class ManifestManager {
 			return self::$cached_manifest;
 		}
 
-		$modules_dir   = SINGO_TOOLS_PATH . 'modules';
-		$current_mtime = is_dir( $modules_dir ) ? (int) filemtime( $modules_dir ) : 0;
-		$cached_mtime  = (int) get_option( self::MTIME_KEY, 0 );
-
-		// Auto-refresh when admin is on the settings page to provide 100% plug-and-play experience
-		$is_admin_settings = is_admin() && isset( $_GET['page'] ) && in_array( $_GET['page'], array( 'singo-tools', 'singo-tools-debug' ), true );
-
-		if ( ! $force_refresh && ! $is_admin_settings && $current_mtime === $cached_mtime && 0 !== $cached_mtime ) {
+		if ( ! $force_refresh ) {
 			$saved = get_option( self::OPTION_KEY, null );
 			if ( is_array( $saved ) && ! empty( $saved ) ) {
 				self::$cached_manifest = $saved;
@@ -123,9 +111,7 @@ class ManifestManager {
 			}
 		}
 
-		$current_mtime = is_dir( $modules_dir ) ? (int) filemtime( $modules_dir ) : 0;
 		update_option( self::OPTION_KEY, $manifest );
-		update_option( self::MTIME_KEY, $current_mtime );
 		self::$cached_manifest = $manifest;
 
 		return $manifest;

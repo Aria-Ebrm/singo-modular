@@ -5,7 +5,7 @@ declare(strict_types=1);
 Plugin Name: Singo Tools (جعبه ابزار سینگو)
 Plugin URI: https://singo.studio
 Description: جعبه ابزار جامع و یکپارچه برای مدیریت بهینه فروشگاه ووکامرس.
-Version: 4.0.0
+Version: 4.1.0
 Requires at least: 6.7
 Requires PHP: 8.0
 Author: Singo Studio
@@ -19,7 +19,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'SINGO_TOOLS_VERSION', '4.0.0' );
+define( 'SINGO_TOOLS_FILE', __FILE__ );
+define( 'SINGO_TOOLS_VERSION', '4.1.0' );
 define( 'SINGO_TOOLS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SINGO_TOOLS_URL', plugin_dir_url( __FILE__ ) );
 
@@ -38,6 +39,15 @@ if ( ! defined( 'SDM_URL' ) ) {
 if ( ! defined( 'OPTNNO_DISABLE_CONFIG' ) ) {
 	define( 'OPTNNO_DISABLE_CONFIG', true );
 }
+
+// Activation Hook: rebuild manifest strictly once upon plugin activation
+register_activation_hook( SINGO_TOOLS_FILE, function (): void {
+	if ( file_exists( SINGO_TOOLS_PATH . 'includes/Core/ManifestManager.php' ) ) {
+		require_once SINGO_TOOLS_PATH . 'includes/Core/ManifestManager.php';
+		\SingoTools\Core\ManifestManager::rebuild_manifest();
+	}
+	update_option( 'singo_tools_version', SINGO_TOOLS_VERSION );
+} );
 
 // Load the Core Bootstrapper
 if ( file_exists( SINGO_TOOLS_PATH . 'includes/class-singo-tools-core.php' ) ) {

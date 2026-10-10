@@ -74,6 +74,47 @@ class Singo_Tools_Core {
 		add_action( 'update_option_singo_tools_options', array( $this, 'purge_cache_on_save' ), 10, 2 );
 		add_action( 'update_option_sdm_options', array( $this, 'purge_cache_on_save' ), 10, 2 );
 		add_filter( 'user_has_cap', array( $this, 'filter_user_capabilities' ), 10, 4 );
+
+		// Rebuild manifest strictly ONCE when plugin is upgraded/replaced in WP Admin
+		add_action( 'upgrader_process_complete', array( $this, 'on_upgrade_complete' ), 10, 2 );
+		add_action( 'admin_init', array( $this, 'check_version_upgrade' ) );
+	}
+
+	/**
+	 * Run manifest rebuild when WordPress finishes an upgrader action (upload zip or auto-update).
+	 *
+	 * @param mixed                $upgrader
+	 * @param array<string, mixed> $hook_extra
+	 */
+	public function on_upgrade_complete( mixed $upgrader, array $hook_extra ): void {
+		if ( ! isset( $hook_extra['type'] ) || 'plugin' !== $hook_extra['type'] ) {
+			return;
+		}
+
+		$plugin_slug = defined( 'SINGO_TOOLS_FILE' ) ? plugin_basename( SINGO_TOOLS_FILE ) : 'singo-tools/singo-tools.php';
+
+		$is_singo_upgrade = false;
+		if ( isset( $hook_extra['plugins'] ) && is_array( $hook_extra['plugins'] ) ) {
+			$is_singo_upgrade = in_array( $plugin_slug, $hook_extra['plugins'], true );
+		} elseif ( isset( $hook_extra['plugin'] ) && is_string( $hook_extra['plugin'] ) ) {
+			$is_singo_upgrade = ( $hook_extra['plugin'] === $plugin_slug );
+		}
+
+		if ( $is_singo_upgrade || empty( $hook_extra['plugins'] ) ) {
+			\SingoTools\Core\ManifestManager::rebuild_manifest();
+			update_option( 'singo_tools_version', SINGO_TOOLS_VERSION );
+		}
+	}
+
+	/**
+	 * Run manifest rebuild once if plugin version in DB differs from code version.
+	 */
+	public function check_version_upgrade(): void {
+		$db_version = (string) get_option( 'singo_tools_version', '' );
+		if ( $db_version !== SINGO_TOOLS_VERSION ) {
+			\SingoTools\Core\ManifestManager::rebuild_manifest();
+			update_option( 'singo_tools_version', SINGO_TOOLS_VERSION );
+		}
 	}
 
 	/**
