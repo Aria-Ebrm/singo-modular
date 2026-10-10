@@ -109,7 +109,7 @@
     if (saveBox) {
       deltaBadge = document.createElement('span');
       deltaBadge.className = 'singo-delta-badge';
-      deltaBadge.style.cssText = 'font-size: 12px; margin-inline-end: 15px; color: #64748b; font-weight: normal; transition: all 0.2s ease;';
+      deltaBadge.style.cssText = 'display: inline-flex; align-items: center; align-self: center; height: 40px; font-size: 13px; font-family: inherit; line-height: 1;';
       saveBox.insertBefore(deltaBadge, saveBox.firstChild);
     }
 
@@ -117,9 +117,9 @@
       if (!deltaBadge) return;
       var count = dirtyFields.size;
       if (count === 0) {
-        deltaBadge.innerHTML = '<span style="color: #94a3b8;">● تمامی تنظیمات ذخیره هستند</span>';
+        deltaBadge.innerHTML = '<span style="color: #94a3b8; display: inline-flex; align-items: center; gap: 6px; line-height: 1;">● تمامی تنظیمات ذخیره هستند</span>';
       } else {
-        deltaBadge.innerHTML = '<strong style="color: #ad6141;">● ' + count + ' تنظیم تغییریافته (ذخیره‌نشده)</strong>';
+        deltaBadge.innerHTML = '<strong style="color: #ad6141; display: inline-flex; align-items: center; gap: 6px; line-height: 1;">● ' + count + ' تنظیم تغییریافته (ذخیره‌نشده)</strong>';
       }
     }
 

@@ -255,22 +255,55 @@ class Singo_Tools_Optionino {
 			.optionino-options-save-box {
 				display: flex !important;
 				justify-content: flex-end !important;
-				align-items: flex-end !important;
+				align-items: center !important;
+				gap: 15px !important;
 				margin-top: auto !important;
 				padding: 15px 0 0 0 !important;
 				width: 100% !important;
 				box-sizing: border-box !important;
 			}
 			.optionino-options-save-box .submit-optionino {
-				align-self: flex-end !important;
+				align-self: center !important;
 				height: 40px !important;
 				min-height: 40px !important;
 				max-height: 40px !important;
+				padding: 0 24px !important;
+				box-sizing: border-box !important;
 				margin: 0 !important;
 				display: inline-flex !important;
 				align-items: center !important;
 				justify-content: center !important;
 				line-height: 1 !important;
+			}
+			.optionino-options-save-box .singo-delta-badge {
+				display: inline-flex !important;
+				align-items: center !important;
+				align-self: center !important;
+				height: 40px !important;
+				line-height: 1 !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				font-size: 13px !important;
+				box-sizing: border-box !important;
+				vertical-align: middle !important;
+			}
+			.optionino-options-save-box .singo-delta-badge > span,
+			.optionino-options-save-box .singo-delta-badge > strong {
+				display: inline-flex !important;
+				align-items: center !important;
+				gap: 6px !important;
+				line-height: 1 !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+			.optionino-options-save-box .error-text,
+			.optionino-options-save-box .success-text {
+				display: inline-flex !important;
+				align-items: center !important;
+				align-self: center !important;
+				height: 40px !important;
+				line-height: 1 !important;
+				margin: 0 !important;
 			}
 			#singo-log-console,
 			#singo-test-output-box,
