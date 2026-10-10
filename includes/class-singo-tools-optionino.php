@@ -77,17 +77,112 @@ class Singo_Tools_Optionino {
 	 * Enqueue WP Admin styles adhering strictly to WordPress 6.7 standards via wp_add_inline_style.
 	 */
 	public static function enqueue_admin_styles(): void {
-		// 1. Global Admin Menu Icon Styling
+		// 1. Global Admin Menu Brand Styling for Singo Tools
+		$primary_color = '#ad6141';
+		$primary_hover = '#984f32';
+		$text_hover    = '#ea8a64';
+
 		$global_css = "
+			/* Logo Icon */
 			#adminmenu #toplevel_page_singo-tools .wp-menu-image img {
 				opacity: 1 !important;
 				filter: brightness(0) invert(1) !important;
 				transition: all 0.2s ease-in-out !important;
 			}
-			#adminmenu #toplevel_page_singo-tools:hover > a,
-			#adminmenu #toplevel_page_singo-tools.wp-has-current-submenu > a,
-			#adminmenu #toplevel_page_singo-tools.current > a {
-				background-color: #ad6141 !important;
+
+			/* Top-level Menu Item: Active, Open, Hover, Focus */
+			#adminmenu li#toplevel_page_singo-tools > a,
+			#adminmenu li#toplevel_page_singo-tools:hover > a,
+			#adminmenu li#toplevel_page_singo-tools:focus > a,
+			#adminmenu li#toplevel_page_singo-tools.opensub > a,
+			#adminmenu li#toplevel_page_singo-tools.selected > a,
+			#adminmenu li#toplevel_page_singo-tools.wp-has-current-submenu > a,
+			#adminmenu li#toplevel_page_singo-tools.current > a,
+			#adminmenu li#toplevel_page_singo-tools.wp-menu-open > a,
+			#adminmenu li#toplevel_page_singo-tools a.menu-top,
+			#adminmenu li#toplevel_page_singo-tools a.menu-top:hover,
+			#adminmenu li#toplevel_page_singo-tools a.menu-top:focus,
+			#adminmenu li#toplevel_page_singo-tools a.menu-top:active {
+				background-color: {$primary_color} !important;
+				color: #ffffff !important;
+			}
+
+			#adminmenu li#toplevel_page_singo-tools:hover > a,
+			#adminmenu li#toplevel_page_singo-tools.opensub > a:hover,
+			#adminmenu li#toplevel_page_singo-tools a.menu-top:hover {
+				background-color: {$primary_hover} !important;
+				color: #ffffff !important;
+			}
+
+			#adminmenu li#toplevel_page_singo-tools .wp-menu-name {
+				color: #ffffff !important;
+			}
+
+			/* Menu Arrows / Pointers */
+			#adminmenu li#toplevel_page_singo-tools.wp-has-current-submenu .wp-menu-arrow div,
+			#adminmenu li#toplevel_page_singo-tools.current .wp-menu-arrow div,
+			#adminmenu li#toplevel_page_singo-tools.opensub .wp-menu-arrow div {
+				border-right-color: {$primary_color} !important;
+			}
+			.rtl #adminmenu li#toplevel_page_singo-tools.wp-has-current-submenu .wp-menu-arrow div,
+			.rtl #adminmenu li#toplevel_page_singo-tools.current .wp-menu-arrow div,
+			.rtl #adminmenu li#toplevel_page_singo-tools.opensub .wp-menu-arrow div {
+				border-left-color: {$primary_color} !important;
+			}
+			#adminmenu li#toplevel_page_singo-tools.wp-has-current-submenu:after,
+			#adminmenu li#toplevel_page_singo-tools.current:after {
+				border-right-color: {$primary_color} !important;
+			}
+			.rtl #adminmenu li#toplevel_page_singo-tools.wp-has-current-submenu:after,
+			.rtl #adminmenu li#toplevel_page_singo-tools.current:after {
+				border-left-color: {$primary_color} !important;
+			}
+
+			/* Submenu Items: Text Color on Hover, Focus, and Active */
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu a:hover,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu a:focus,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu a:active,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li:hover > a,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li:focus > a,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a:hover,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a:focus {
+				color: {$text_hover} !important;
+			}
+
+			/* Submenu Items: Right / Left Border & Indicator Bar on Hover, Focus, and Active */
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:hover,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:focus,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a {
+				border-color: {$primary_color} !important;
+			}
+
+			.rtl #adminmenu li#toplevel_page_singo-tools .wp-submenu li a:hover,
+			.rtl #adminmenu li#toplevel_page_singo-tools .wp-submenu li a:focus,
+			.rtl #adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a {
+				border-right: 4px solid {$primary_color} !important;
+				border-right-color: {$primary_color} !important;
+				box-shadow: inset -4px 0 0 {$primary_color} !important;
+			}
+
+			/* LTR fallback indicator */
+			body:not(.rtl) #adminmenu li#toplevel_page_singo-tools .wp-submenu li a:hover,
+			body:not(.rtl) #adminmenu li#toplevel_page_singo-tools .wp-submenu li a:focus,
+			body:not(.rtl) #adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a {
+				border-left: 4px solid {$primary_color} !important;
+				border-left-color: {$primary_color} !important;
+				box-shadow: inset 4px 0 0 {$primary_color} !important;
+			}
+
+			/* Submenu Pseudo-element Indicators (::before / ::after) */
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:hover::before,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:focus::before,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a::before,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:hover::after,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li a:focus::after,
+			#adminmenu li#toplevel_page_singo-tools .wp-submenu li.current a::after {
+				background-color: {$primary_color} !important;
+				border-color: {$primary_color} !important;
 			}
 		";
 
