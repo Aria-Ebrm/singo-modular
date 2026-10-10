@@ -15,6 +15,66 @@
 (function($) {
   'use strict';
 
+  function initShortcodeCopy() {
+    var $input = $('#mu_shortcode_info');
+    if (!$input.length || $input.data('singo-copy-ready')) {
+      return;
+    }
+    $input.data('singo-copy-ready', true);
+
+    // Make input readonly and easy to select
+    $input.attr('readonly', 'readonly');
+
+    // Check if wrapper already exists
+    if (!$input.parent().hasClass('singo-shortcode-field-wrapper')) {
+      var $wrapper = $('<div class="singo-shortcode-field-wrapper"></div>');
+      $input.wrap($wrapper);
+
+      var $copyBtn = $(
+        '<button type="button" class="singo-copy-shortcode-btn" title="کپی کردن شورت‌کد">' +
+          '<span class="dashicons dashicons-admin-page"></span>' +
+          '<span class="singo-copy-btn-text">کپی شورت‌کد</span>' +
+        '</button>'
+      );
+
+      $input.after($copyBtn);
+
+      $copyBtn.on('click', function(e) {
+        e.preventDefault();
+        var shortcodeVal = $input.val() || '[dynamic_product_specs]';
+
+        function handleCopiedState() {
+          $copyBtn.addClass('is-copied');
+          $copyBtn.html('<span class="dashicons dashicons-yes"></span><span class="singo-copy-btn-text">کپی شد!</span>');
+          setTimeout(function() {
+            $copyBtn.removeClass('is-copied');
+            $copyBtn.html('<span class="dashicons dashicons-admin-page"></span><span class="singo-copy-btn-text">کپی شورت‌کد</span>');
+          }, 2000);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(shortcodeVal).then(handleCopiedState).catch(function() {
+            fallbackCopy();
+          });
+        } else {
+          fallbackCopy();
+        }
+
+        function fallbackCopy() {
+          $input.focus().select();
+          try {
+            document.execCommand('copy');
+            handleCopiedState();
+          } catch (err) {}
+        }
+      });
+
+      $input.on('click', function() {
+        $(this).select();
+      });
+    }
+  }
+
   function initProductFeaturesRepeater() {
     $('.optionino-repeater-field[data-repeater-name="mu_attribute_groups"]').each(function() {
       var $field = $(this);
@@ -28,37 +88,39 @@
       // Enhance existing items
       setupRepeaterItems($container);
 
-      // Enable Drag & Drop with jQuery UI Sortable
+      // Enable Drag & Drop with jQuery UI Sortable (Zero Glitch & Zero Jumping)
       if ($.fn.sortable) {
         $container.sortable({
           handle: '.singo-drag-handle',
           items: '> .optionino-repeater-item',
           axis: 'y',
-          containment: 'parent', // STRICT: Cannot escape or overlap other tabs
           cursor: 'grabbing',
-          opacity: 0.92,
+          opacity: 0.95,
           tolerance: 'pointer',
           forcePlaceholderSize: true,
           forceHelperSize: true,
-          placeholder: 'optionino-repeater-item singo-sortable-placeholder',
+          appendTo: 'body', // Append helper directly to body to avoid flex container & scroll jumping
           helper: function(e, item) {
             var $clone = item.clone();
             $clone.css({
               'width': item.outerWidth() + 'px',
               'box-sizing': 'border-box',
-              'z-index': 99999
+              'z-index': 999999
             });
             return $clone;
           },
+          placeholder: 'optionino-repeater-item singo-sortable-placeholder',
           start: function(e, ui) {
             ui.placeholder.css({
               'height': ui.item.outerHeight() + 'px',
-              'width': ui.item.outerWidth() + 'px',
               'box-sizing': 'border-box',
-              'visibility': 'visible'
+              'visibility': 'visible',
+              'margin-bottom': '10px'
             });
+            ui.item.css('opacity', '0.25');
           },
-          stop: function() {
+          stop: function(e, ui) {
+            ui.item.css('opacity', '1');
             reindexRepeater($container);
             triggerRepeaterChange($field[0]);
           }
@@ -250,9 +312,13 @@
 
   // Initialize on DOM Ready and on Tab switches
   $(document).ready(function() {
+    initShortcodeCopy();
     initProductFeaturesRepeater();
     $(document).on('click', '.tablinks', function() {
-      setTimeout(initProductFeaturesRepeater, 50);
+      setTimeout(function() {
+        initShortcodeCopy();
+        initProductFeaturesRepeater();
+      }, 50);
     });
   });
 

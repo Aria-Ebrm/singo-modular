@@ -57,7 +57,7 @@ class ProductFeaturesModule extends AbstractModule {
 					'id'    => 'mu_shortcode_info',
 					'type'  => 'text',
 					'title' => 'شورت‌کد اختصاصی نمایش ویژگی‌های محصول',
-					'desc'  => 'می‌توانید از شورت‌کد [dynamic_product_specs] در برگه‌سازها، چیدمان محصول یا تب‌های دلخواه قالب استفاده نمایید.',
+					'desc'  => 'می‌توانید از این شورت‌کد در المنتور، برگه‌سازها، چیدمان محصول یا تب‌های اختصاصی قالب استفاده نمایید.',
 				),
 				array(
 					'id'     => 'mu_attribute_groups',

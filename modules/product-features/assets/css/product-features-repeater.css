@@ -1,9 +1,93 @@
 /**
- * Singo Tools - Product Features Repeater Styles (Self-Contained)
+ * Singo Tools - Product Features Repeater & Shortcode Styles (Self-Contained)
  *
  * @package SingoTools\Modules\ProductFeatures
  * @since 4.3.0
  */
+
+/* Shortcode Field Wrapper & Optionino-Native Copy Button */
+.singo-shortcode-field-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 4px 0 10px 0 !important;
+}
+
+.singo-shortcode-field-wrapper .optionino-input {
+    flex: 1 !important;
+    height: 42px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 9px !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    font-family: monospace !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
+    background: #f8fafc !important;
+    direction: ltr !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.singo-shortcode-field-wrapper .optionino-input:focus {
+    border-color: #ad6141 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(173, 97, 65, 0.15) !important;
+    outline: none !important;
+}
+
+.singo-copy-shortcode-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 42px !important;
+    padding: 0 18px !important;
+    background: var(--optionino-main-color, #ad6141) !important;
+    color: #ffffff !important;
+    border: 1.5px solid transparent !important;
+    border-radius: 9px !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.singo-copy-shortcode-btn:hover {
+    background: #8c4b30 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.singo-copy-shortcode-btn:active {
+    transform: translateY(0) !important;
+}
+
+.singo-copy-shortcode-btn .dashicons {
+    font-size: 17px !important;
+    width: 17px !important;
+    height: 17px !important;
+    line-height: 17px !important;
+    vertical-align: middle !important;
+    color: inherit !important;
+}
+
+.singo-copy-shortcode-btn.is-copied {
+    background: #16a34a !important;
+    border-color: #15803d !important;
+    color: #ffffff !important;
+}
 
 /* Repeater Outer Container */
 .optionino-repeater-field[data-repeater-name="mu_attribute_groups"] {
@@ -14,7 +98,6 @@
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
     padding: 8px 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -28,6 +111,7 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 12px !important;
+    margin-bottom: 10px !important;
     padding: 8px 16px !important;
     min-height: 56px !important;
     height: auto !important;
@@ -252,21 +336,27 @@
 
 /* Sortable States: STABLE & CONTAINED (Zero Layout Shift) */
 .optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.singo-sortable-placeholder {
-    background: #f8fafc !important;
+    background: #fdfaf8 !important;
     border: 2px dashed #ad6141 !important;
     border-radius: 10px !important;
     visibility: visible !important;
     box-sizing: border-box !important;
-    opacity: 0.6 !important;
+    opacity: 0.7 !important;
+    margin-bottom: 10px !important;
+    display: flex !important;
 }
 
-.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.ui-sortable-helper {
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.ui-sortable-helper,
+.optionino-repeater-item.ui-sortable-helper {
     position: absolute !important;
     background: #ffffff !important;
     border: 1.5px solid #ad6141 !important;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
     cursor: grabbing !important;
     border-radius: 10px !important;
     box-sizing: border-box !important;
-    z-index: 99999 !important;
+    z-index: 999999 !important;
+    pointer-events: none !important;
+    opacity: 0.98 !important;
+    margin-bottom: 0 !important;
 }
