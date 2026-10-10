@@ -67,6 +67,13 @@ class DeltaManager {
 					'old' => null,
 					'new' => $val,
 				);
+			} elseif ( is_array( $val ) && is_array( $old_data[ $key ] ) ) {
+				if ( wp_json_encode( $old_data[ $key ] ) !== wp_json_encode( $val ) ) {
+					$delta[ $key ] = array(
+						'old' => $old_data[ $key ],
+						'new' => $val,
+					);
+				}
 			} elseif ( $old_data[ $key ] !== $val ) {
 				$delta[ $key ] = array(
 					'old' => $old_data[ $key ],

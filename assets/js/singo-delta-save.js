@@ -3,6 +3,7 @@
  *
  * Intercepts Optionino settings form submission to send ONLY modified fields,
  * reducing payload from full-form bloat to a sub-millisecond delta.
+ * Includes full support for Optionino repeaters and yellow warning notices.
  *
  * @package SingoTools
  * @since 4.2.0
@@ -21,6 +22,15 @@
     var successText = form.querySelector('.success-text');
     var saveBox = form.querySelector('.optionino-options-save-box');
 
+    // Warning notification element (Amber / Yellow Warning Palette)
+    var warningText = form.querySelector('.warning-text');
+    if (!warningText && saveBox) {
+      warningText = document.createElement('span');
+      warningText.className = 'warning-text';
+      warningText.style.display = 'none';
+      saveBox.appendChild(warningText);
+    }
+
     var ignoreNames = ['action', 'security', 'dev_name', 'save-optionino'];
     var initialSnapshot = new Map();
     var dirtyFields = new Set();
@@ -32,7 +42,20 @@
       repeaterItems.forEach(function(repeaterItem) {
         var subArray = {};
         repeaterItem.querySelectorAll('input, textarea, select').forEach(function(input) {
-          subArray[input.name.replace(/_\d+$/, '').replace(/^_/, '')] = input.value;
+          var name = input.name;
+          if (!name || name.endsWith('_filled')) {
+            return;
+          }
+          var cleanKey = name.replace(/_\d+$/, '').replace(/^_/, '');
+          if (input.type === 'checkbox') {
+            subArray[cleanKey] = input.checked ? (input.value || 'true') : 'false';
+          } else if (input.type === 'radio') {
+            if (input.checked) {
+              subArray[cleanKey] = input.value;
+            }
+          } else {
+            subArray[cleanKey] = input.value != null ? String(input.value) : '';
+          }
         });
         mainArray.push(encodeRepeaterValues(subArray));
       });
@@ -90,6 +113,10 @@
         if (!name || ignoreNames.indexOf(name) !== -1 || initialSnapshot.has(name)) {
           return;
         }
+        // If element is inside a repeater, don't record sub-inputs directly
+        if (el.closest('.optionino-repeater-field')) {
+          return;
+        }
         initialSnapshot.set(name, readFieldValue(name));
       });
 
@@ -123,9 +150,57 @@
       }
     }
 
+    function showWarning(msg) {
+      if (errorText) errorText.style.display = 'none';
+      if (successText) successText.style.display = 'none';
+      if (warningText) {
+        warningText.innerHTML = '<span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px; margin-inline-end: 4px; vertical-align: middle;"></span> ' + msg;
+        warningText.style.display = 'inline-flex';
+        setTimeout(function() {
+          warningText.style.display = 'none';
+        }, 3500);
+      }
+    }
+
+    // Evaluate repeater modifications
+    function evaluateRepeater(repeaterEl) {
+      if (!repeaterEl) return;
+      var repName = repeaterEl.getAttribute('data-repeater-name');
+      if (!repName) return;
+
+      var currentVal = collectRepeaterValues(repeaterEl);
+      var initialVal = initialSnapshot.get(repName);
+
+      if (currentVal !== initialVal) {
+        dirtyFields.add(repName);
+      } else {
+        dirtyFields.delete(repName);
+      }
+
+      updateDeltaBadge();
+    }
+
     // Check if field is modified
-    function evaluateField(name) {
-      if (!name || ignoreNames.indexOf(name) !== -1 || !initialSnapshot.has(name)) {
+    function evaluateField(name, targetEl) {
+      if (!name || ignoreNames.indexOf(name) !== -1) {
+        return;
+      }
+
+      // If target element is inside a repeater, evaluate parent repeater
+      var parentRepeater = targetEl ? targetEl.closest('.optionino-repeater-field') : null;
+      if (!parentRepeater && name) {
+        var foundEl = form.querySelector('[name="' + name + '"]');
+        if (foundEl) {
+          parentRepeater = foundEl.closest('.optionino-repeater-field');
+        }
+      }
+
+      if (parentRepeater) {
+        evaluateRepeater(parentRepeater);
+        return;
+      }
+
+      if (!initialSnapshot.has(name)) {
         return;
       }
 
@@ -141,21 +216,28 @@
       updateDeltaBadge();
     }
 
+    // Listen to custom repeater change event dispatched by singo-repeater.js
+    document.addEventListener('singo:repeater-changed', function(e) {
+      if (e.detail && e.detail.repeater) {
+        evaluateRepeater(e.detail.repeater);
+      }
+    });
+
     // Listen to changes across all inputs
     form.addEventListener('input', function(e) {
       if (e.target && e.target.name) {
-        evaluateField(e.target.name);
+        evaluateField(e.target.name, e.target);
       }
     }, true);
 
     form.addEventListener('change', function(e) {
       if (e.target && e.target.name) {
-        evaluateField(e.target.name);
+        evaluateField(e.target.name, e.target);
       }
     }, true);
 
     // Initial snapshot capture (short delay to ensure Optionino and color pickers ready)
-    setTimeout(captureInitialSnapshot, 100);
+    setTimeout(captureInitialSnapshot, 150);
 
     // Capture Phase Form Interception (fires BEFORE Optionino's default submit listener)
     form.addEventListener('submit', function(e) {
@@ -164,16 +246,11 @@
 
       if (errorText) errorText.style.display = 'none';
       if (successText) successText.style.display = 'none';
+      if (warningText) warningText.style.display = 'none';
 
-      // Zero changes: instant feedback, no network request
+      // Zero changes: instant feedback with Yellow Warning Palette, no network request
       if (dirtyFields.size === 0) {
-        if (successText) {
-          successText.textContent = 'هیچ تغییری اعمال نشده است (تمامی تنظیمات بروز هستند).';
-          successText.style.display = 'block';
-          setTimeout(function() {
-            successText.style.display = 'none';
-          }, 3000);
-        }
+        showWarning('هیچ تغییری اعمال نشده است (تمامی تنظیمات بروز هستند).');
         return;
       }
 
@@ -227,12 +304,15 @@
 
           if (successText) {
             successText.textContent = (response.data && response.data.message) || 'تغییرات با موفقیت ذخیره شد.';
-            successText.style.display = 'block';
+            successText.style.display = 'inline-flex';
+            setTimeout(function() {
+              successText.style.display = 'none';
+            }, 3000);
           }
         } else {
           if (errorText) {
             errorText.textContent = (response.data && response.data.message) || 'خطا در ذخیره‌سازی اطلاعات.';
-            errorText.style.display = 'block';
+            errorText.style.display = 'inline-flex';
           }
         }
       };
@@ -241,7 +321,7 @@
         if (OPTNNO) OPTNNO.classList.remove('loading');
         if (errorText) {
           errorText.textContent = 'خطای شبکه رخ داده است. لطفاً اتصال اینترنت خود را بررسی نمایید.';
-          errorText.style.display = 'block';
+          errorText.style.display = 'inline-flex';
         }
       };
 

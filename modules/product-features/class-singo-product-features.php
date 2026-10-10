@@ -78,6 +78,32 @@ class Singo_Product_Features {
 			return $new_value;
 		}
 
+		// Process native Optionino repeater groups if posted
+		if ( isset( $new_value['mu_attribute_groups'] ) && is_array( $new_value['mu_attribute_groups'] ) ) {
+			$repeater_names   = array();
+			$repeater_default = '';
+
+			foreach ( $new_value['mu_attribute_groups'] as $item ) {
+				if ( is_array( $item ) && ! empty( $item['group_title'] ) ) {
+					$title = sanitize_text_field( wp_unslash( $item['group_title'] ) );
+					if ( ! empty( $title ) && ! in_array( $title, $repeater_names, true ) ) {
+						$repeater_names[] = $title;
+						$is_def = isset( $item['is_default'] ) && ( $item['is_default'] === 'true' || $item['is_default'] === 'on' || $item['is_default'] === '1' );
+						if ( $is_def && empty( $repeater_default ) ) {
+							$repeater_default = $title;
+						}
+					}
+				}
+			}
+
+			if ( ! empty( $repeater_names ) ) {
+				$new_value['mu_groups'] = $repeater_names;
+				if ( ! empty( $repeater_default ) ) {
+					$new_value['mu_default_group'] = $repeater_default;
+				}
+			}
+		}
+
 		// Safeguard: Preserve existing groups if mu_groups is missing or empty
 		if ( ! isset( $new_value['mu_groups'] ) || ! is_array( $new_value['mu_groups'] ) || empty( $new_value['mu_groups'] ) ) {
 			if ( isset( $old_value['mu_groups'] ) && is_array( $old_value['mu_groups'] ) && ! empty( $old_value['mu_groups'] ) ) {
@@ -151,6 +177,16 @@ class Singo_Product_Features {
 		}
 
 		$new_value['mu_default_group'] = $default_group;
+
+		// Rebuild synchronized native repeater structure
+		$synced_repeater = array();
+		foreach ( $sanitized_groups as $g_name ) {
+			$synced_repeater[] = array(
+				'group_title' => $g_name,
+				'is_default'  => ( $g_name === $default_group ) ? 'true' : 'false',
+			);
+		}
+		$new_value['mu_attribute_groups'] = $synced_repeater;
 
 		// Persist dedicated options as permanent backup
 		update_option( 'mu_attribute_groups', $sanitized_groups, true );

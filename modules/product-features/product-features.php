@@ -19,6 +19,31 @@ function mu_get_attribute_groups(): array {
 		return $cached_groups;
 	}
 
+	// 1. Try native Optionino repeater groups
+	$repeater_groups = singo_tools_get_option( 'mu_attribute_groups', null );
+	if ( is_array( $repeater_groups ) && ! empty( $repeater_groups ) ) {
+		$result   = array();
+		$priority = 1;
+		foreach ( $repeater_groups as $item ) {
+			if ( is_array( $item ) && ! empty( $item['group_title'] ) ) {
+				$clean = trim( (string) $item['group_title'] );
+				if ( ! empty( $clean ) && ! array_key_exists( $clean, $result ) ) {
+					$result[ $clean ] = $priority++;
+				}
+			} elseif ( is_string( $item ) && ! empty( $item ) ) {
+				$clean = trim( $item );
+				if ( ! empty( $clean ) && ! array_key_exists( $clean, $result ) ) {
+					$result[ $clean ] = $priority++;
+				}
+			}
+		}
+		if ( ! empty( $result ) ) {
+			$cached_groups = $result;
+			return $cached_groups;
+		}
+	}
+
+	// 2. Fallback to legacy mu_groups or dedicated option
 	$groups = singo_tools_get_option( 'mu_groups', null );
 
 	if ( ! is_array( $groups ) || empty( $groups ) ) {
@@ -61,6 +86,21 @@ function mu_get_default_attribute_group(): string {
 		return $cached_default;
 	}
 
+	// 1. Try native Optionino repeater groups
+	$repeater_groups = singo_tools_get_option( 'mu_attribute_groups', null );
+	if ( is_array( $repeater_groups ) && ! empty( $repeater_groups ) ) {
+		foreach ( $repeater_groups as $item ) {
+			if ( is_array( $item ) && ! empty( $item['group_title'] ) ) {
+				$is_def = isset( $item['is_default'] ) && ( $item['is_default'] === 'true' || $item['is_default'] === 'on' || $item['is_default'] === '1' );
+				if ( $is_def ) {
+					$cached_default = trim( (string) $item['group_title'] );
+					return $cached_default;
+				}
+			}
+		}
+	}
+
+	// 2. Fallback to legacy options
 	$default = singo_tools_get_option( 'mu_default_group', '' );
 	if ( empty( $default ) ) {
 		$default = get_option( 'mu_default_attribute_group', 'سایر مشخصات' );

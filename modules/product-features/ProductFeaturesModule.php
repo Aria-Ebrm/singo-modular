@@ -41,22 +41,50 @@ class ProductFeaturesModule extends AbstractModule {
 	}
 
 	public function get_optionino_tab(): ?array {
-		$view = $this->get_path( 'views/admin-groups-view.php' );
-		if ( ! file_exists( $view ) ) {
-			return null;
-		}
-
 		return array(
-			'id'    => 'product_features',
-			'title' => self::get_name(),
-			'desc'  => 'دسته‌بندی، اولویت‌بندی و نمایش اختصاصی ویژگی‌های محصولات با شورت‌کد.',
-			'icon'  => self::get_icon(),
-			'file'  => $view,
+			'id'     => 'product_features',
+			'title'  => self::get_name(),
+			'desc'   => 'دسته‌بندی، اولویت‌بندی و نمایش اختصاصی ویژگی‌های محصولات با شورت‌کد.',
+			'icon'   => self::get_icon(),
+			'fields' => array(
+				array(
+					'id'    => 'enable_product_features',
+					'type'  => 'switcher',
+					'title' => 'فعال‌سازی ماژول گروه‌بندی ویژگی‌ها',
+					'desc'  => 'با غیرفعال‌سازی این گزینه، تمام قابلیت‌های گروه‌بندی ویژگی‌ها غیرفعال شده و جدول ویژگی‌ها به حالت عادی ووکامرس برمی‌گردد.',
+				),
+				array(
+					'id'    => 'mu_shortcode_info',
+					'type'  => 'text',
+					'title' => 'شورت‌کد اختصاصی نمایش ویژگی‌های محصول',
+					'desc'  => 'می‌توانید از شورت‌کد [dynamic_product_specs] در برگه‌سازها، چیدمان محصول یا تب‌های دلخواه قالب استفاده نمایید.',
+				),
+				array(
+					'id'     => 'mu_attribute_groups',
+					'type'   => 'repeater',
+					'title'  => 'مدیریت و اولویت‌بندی گروه‌ها',
+					'desc'   => 'برای تغییر اولویت گروه‌ها، آن‌ها را با ماوس بکشید و رها کنید (Drag & Drop). یک گروه را به عنوان پیش‌فرض مشخص نمایید.',
+					'fields' => array(
+						array(
+							'id'    => 'group_title',
+							'type'  => 'text',
+							'title' => 'عنوان گروه',
+						),
+						array(
+							'id'    => 'is_default',
+							'type'  => 'switcher',
+							'title' => 'انتخاب به عنوان پیش‌فرض',
+						),
+					),
+				),
+			),
 		);
 	}
 
 	public function init(): void {
 		parent::init();
+
+		add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
 
 		$legacy_init = $this->get_path( 'product-features.php' );
 		if ( file_exists( $legacy_init ) ) {
@@ -70,5 +98,48 @@ class ProductFeaturesModule extends AbstractModule {
 				\Singo_Product_Features::get_instance();
 			}
 		}
+	}
+
+	/**
+	 * Provide defaults for shortcode and repeater attribute groups if not yet saved in database.
+	 *
+	 * @param mixed $options
+	 * @return mixed
+	 */
+	public function filter_default_options( mixed $options ): mixed {
+		if ( ! is_array( $options ) ) {
+			$options = array();
+		}
+
+		if ( empty( $options['mu_shortcode_info'] ) ) {
+			$options['mu_shortcode_info'] = '[dynamic_product_specs]';
+		}
+
+		if ( empty( $options['mu_attribute_groups'] ) ) {
+			$groups = $options['mu_groups'] ?? get_option( 'mu_attribute_groups', array() );
+			if ( empty( $groups ) || ! is_array( $groups ) ) {
+				$groups = array( 'مشخصات کلی', 'سایر مشخصات' );
+			}
+			$default_group = $options['mu_default_group'] ?? get_option( 'mu_default_attribute_group', 'مشخصات کلی' );
+
+			$repeater = array();
+			foreach ( $groups as $g ) {
+				$title = is_string( $g ) ? trim( $g ) : '';
+				if ( ! empty( $title ) ) {
+					$repeater[] = array(
+						'group_title' => $title,
+						'is_default'  => ( $title === $default_group ) ? 'true' : 'false',
+					);
+				}
+			}
+
+			if ( ! empty( $repeater ) && ! in_array( 'true', array_column( $repeater, 'is_default' ), true ) ) {
+				$repeater[0]['is_default'] = 'true';
+			}
+
+			$options['mu_attribute_groups'] = $repeater;
+		}
+
+		return $options;
 	}
 }
