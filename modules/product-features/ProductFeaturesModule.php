@@ -85,7 +85,6 @@ class ProductFeaturesModule extends AbstractModule {
 		parent::init();
 
 		add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 
 		$legacy_init = $this->get_path( 'product-features.php' );
 		if ( file_exists( $legacy_init ) ) {
@@ -104,10 +103,9 @@ class ProductFeaturesModule extends AbstractModule {
 	/**
 	 * Enqueue module admin scripts and styles using self-contained get_url().
 	 *
-	 * @param string $hook
 	 * @return void
 	 */
-	public function enqueue_admin_assets( string $hook ): void {
+	public function enqueue_admin_assets(): void {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		if ( ! $screen || ( $screen->id !== 'toplevel_page_singo-tools' && $screen->id !== 'singo-tools_page_singo-tools-debug' ) ) {
 			return;

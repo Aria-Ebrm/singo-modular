@@ -22,15 +22,6 @@
     var successText = form.querySelector('.success-text');
     var saveBox = form.querySelector('.optionino-options-save-box');
 
-    // Warning notification element (Amber / Yellow Warning Palette)
-    var warningText = form.querySelector('.warning-text');
-    if (!warningText && saveBox) {
-      warningText = document.createElement('span');
-      warningText.className = 'warning-text singo-warning-notice';
-      warningText.style.display = 'none';
-      saveBox.appendChild(warningText);
-    }
-
     var ignoreNames = ['action', 'security', 'dev_name', 'save-optionino'];
     var initialSnapshot = new Map();
     var dirtyFields = new Set();
@@ -150,43 +141,60 @@
       }
     }
 
-    // Dedicated Yellow Warning Notification function
+    // Dedicated Yellow Warning Notification function (100% Optionino Native System, Yellow Palette)
     function showWarning(msg) {
-      if (errorText) errorText.style.display = 'none';
-
-      // 1. Top banner: transform successText into prominent Amber-Yellow Warning
-      if (successText) {
-        successText.innerHTML = '<span class="dashicons dashicons-warning" style="font-size: 18px; width: 18px; height: 18px; margin-inline-end: 6px; vertical-align: middle;"></span> ' + msg;
-        successText.className = 'success-text singo-warning-notice';
-        successText.style.cssText = 'display: block !important; background-color: #fef3c7 !important; border: 1px solid #f59e0b !important; color: #92400e !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;';
-        setTimeout(function() {
-          successText.style.display = 'none';
-          successText.className = 'success-text';
-        }, 3500);
+      if (errorText) {
+        errorText.style.display = 'none';
+        errorText.style.cssText = '';
+        errorText.textContent = '';
       }
 
-      // 2. Bottom saveBox inline badge
-      if (warningText) {
-        warningText.innerHTML = '<span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px; margin-inline-end: 4px; vertical-align: middle;"></span> ' + msg;
-        warningText.style.cssText = 'display: inline-flex !important; align-items: center !important; align-self: center !important; height: 40px !important; line-height: 1 !important; margin: 0 !important; padding: 0 16px !important; border-radius: 8px !important; background-color: #fef3c7 !important; border: 1px solid #f59e0b !important; color: #92400e !important; font-size: 13px !important; font-weight: 600 !important; box-sizing: border-box !important; gap: 6px !important;';
+      if (successText) {
+        successText.textContent = msg;
+        successText.style.cssText = 'display: block !important; color: #854d0e !important; background: #fef9c3 !important; border: 1px solid #fde047 !important; padding: 8px 10px !important; text-align: center !important; font-weight: 600 !important; font-size: 15px !important; border-radius: 8px !important; margin: 0 0 15px 0 !important;';
         setTimeout(function() {
-          warningText.style.display = 'none';
+          successText.style.display = 'none';
+          successText.style.cssText = '';
+          successText.textContent = '';
         }, 3500);
       }
     }
 
-    // Dedicated Green Success Notification function
+    // Dedicated Green Success Notification function (100% Optionino Native System)
     function showSuccess(msg) {
-      if (errorText) errorText.style.display = 'none';
-      if (warningText) warningText.style.display = 'none';
+      if (errorText) {
+        errorText.style.display = 'none';
+        errorText.style.cssText = '';
+        errorText.textContent = '';
+      }
 
       if (successText) {
-        successText.className = 'success-text';
-        successText.style.cssText = 'display: block !important; background-color: #dff8d7 !important; border: 1px solid #d1f5c6 !important; color: #427e1b !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
         successText.textContent = msg;
+        successText.style.cssText = 'display: block !important; color: #427e1b !important; background: #dff8d7 !important; border: 1px solid #d1f5c6 !important; padding: 8px 10px !important; text-align: center !important; font-weight: 600 !important; font-size: 15px !important; border-radius: 8px !important; margin: 0 0 15px 0 !important;';
         setTimeout(function() {
           successText.style.display = 'none';
+          successText.style.cssText = '';
+          successText.textContent = '';
         }, 3000);
+      }
+    }
+
+    // Dedicated Red Error Notification function (100% Optionino Native System)
+    function showError(msg) {
+      if (successText) {
+        successText.style.display = 'none';
+        successText.style.cssText = '';
+        successText.textContent = '';
+      }
+
+      if (errorText) {
+        errorText.textContent = msg;
+        errorText.style.cssText = 'display: block !important; color: #b52230 !important; background: #f8d7da !important; border: 1px solid #f5c2c7 !important; padding: 8px 10px !important; text-align: center !important; font-weight: 600 !important; font-size: 15px !important; border-radius: 8px !important; margin: 0 0 15px 0 !important;';
+        setTimeout(function() {
+          errorText.style.display = 'none';
+          errorText.style.cssText = '';
+          errorText.textContent = '';
+        }, 4000);
       }
     }
 
@@ -272,9 +280,16 @@
       e.preventDefault();
       e.stopImmediatePropagation();
 
-      if (errorText) errorText.style.display = 'none';
-      if (successText) successText.style.display = 'none';
-      if (warningText) warningText.style.display = 'none';
+      if (errorText) {
+        errorText.style.display = 'none';
+        errorText.style.cssText = '';
+        errorText.textContent = '';
+      }
+      if (successText) {
+        successText.style.display = 'none';
+        successText.style.cssText = '';
+        successText.textContent = '';
+      }
 
       // Zero changes: instant feedback with Yellow Warning Palette, no network request
       if (dirtyFields.size === 0) {
@@ -332,21 +347,13 @@
 
           showSuccess((response.data && response.data.message) || 'تنظیمات با موفقیت ذخیره شد.');
         } else {
-          if (errorText) {
-            errorText.className = 'error-text';
-            errorText.style.cssText = 'display: block !important; background-color: #ffebe8 !important; border: 1px solid #cc0000 !important; color: #dc3232 !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
-            errorText.textContent = (response.data && response.data.message) || 'خطا در ذخیره‌سازی اطلاعات.';
-          }
+          showError((response.data && response.data.message) || 'خطا در ذخیره‌سازی اطلاعات.');
         }
       };
 
       xhr.onerror = function() {
         if (OPTNNO) OPTNNO.classList.remove('loading');
-        if (errorText) {
-          errorText.className = 'error-text';
-          errorText.style.cssText = 'display: block !important; background-color: #ffebe8 !important; border: 1px solid #cc0000 !important; color: #dc3232 !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
-          errorText.textContent = 'خطای شبکه رخ داده است. لطفاً اتصال اینترنت خود را بررسی نمایید.';
-        }
+        showError('خطای شبکه رخ داده است. لطفاً اتصال اینترنت خود را بررسی نمایید.');
       };
 
       xhr.send(formData);

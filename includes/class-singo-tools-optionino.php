@@ -298,48 +298,6 @@ class Singo_Tools_Optionino {
 				margin: 0 !important;
 				padding: 0 !important;
 			}
-			.optionino-options-save-box .error-text,
-			.optionino-options-save-box .success-text {
-				display: inline-flex !important;
-				align-items: center !important;
-				align-self: center !important;
-				height: 40px !important;
-				line-height: 1 !important;
-				margin: 0 !important;
-			}
-			.optionino-options-save-box .warning-text,
-			.singo-warning-notice {
-				display: inline-flex !important;
-				align-items: center !important;
-				align-self: center !important;
-				height: 40px !important;
-				line-height: 1 !important;
-				margin: 0 !important;
-				padding: 0 16px !important;
-				border-radius: 8px !important;
-				background-color: #fef3c7 !important;
-				border: 1px solid #f59e0b !important;
-				color: #92400e !important;
-				font-size: 13px !important;
-				font-weight: 600 !important;
-				box-sizing: border-box !important;
-				gap: 6px !important;
-			}
-			.optionino-container .success-text.singo-warning-notice,
-			.optionino-section .success-text.singo-warning-notice,
-			.success-text.singo-warning-notice {
-				display: block !important;
-				background-color: #fef3c7 !important;
-				border: 1px solid #f59e0b !important;
-				color: #92400e !important;
-				padding: 12px 18px !important;
-				border-radius: 8px !important;
-				font-size: 14px !important;
-				font-weight: 600 !important;
-				text-align: center !important;
-				margin: 10px 0 20px 0 !important;
-				line-height: 1.5 !important;
-			}
 			#singo-log-console,
 			#singo-test-output-box,
 			#singo-db-inspect-output {
