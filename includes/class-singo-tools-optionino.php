@@ -164,11 +164,13 @@ class Singo_Tools_Optionino {
 		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_script( 'wp-color-picker' );
 
+		$delta_path = SINGO_TOOLS_PATH . 'assets/js/singo-delta-save.js';
+		$delta_ver  = file_exists( $delta_path ) ? (string) filemtime( $delta_path ) : SINGO_TOOLS_VERSION;
 		wp_enqueue_script(
 			'singo-delta-save',
 			SINGO_TOOLS_URL . 'assets/js/singo-delta-save.js',
 			array( 'jquery' ),
-			SINGO_TOOLS_VERSION,
+			$delta_ver,
 			true
 		);
 
@@ -323,136 +325,20 @@ class Singo_Tools_Optionino {
 				box-sizing: border-box !important;
 				gap: 6px !important;
 			}
-			/* Optionino Repeater Modern & Drag-and-Drop Enhancements */
-			.optionino-repeater-field {
-				margin-top: 10px !important;
-			}
-			.optionino-repeater-container {
-				display: flex !important;
-				flex-direction: column !important;
-				gap: 12px !important;
-				padding: 10px 0 !important;
-			}
-			.optionino-repeater-item {
-				position: relative !important;
-				border: 1px solid #e2e8f0 !important;
-				background: #ffffff !important;
-				border-radius: 12px !important;
-				padding: 14px 18px !important;
-				display: flex !important;
-				align-items: center !important;
-				gap: 15px !important;
-				transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-			}
-			.optionino-repeater-item:hover {
-				border-color: #cbd5e1 !important;
-			}
-			.optionino-repeater-item.ui-sortable-helper {
-				background: #ffffff !important;
-				border-color: #ad6141 !important;
-				box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
-				cursor: grabbing !important;
-			}
-			.optionino-repeater-item.ui-sortable-placeholder {
-				background: #f8fafc !important;
-				border: 2px dashed #cbd5e1 !important;
-				visibility: visible !important;
-				border-radius: 12px !important;
-				min-height: 56px !important;
-			}
-			.optionino-repeater-item.is-default-row {
-				border-color: #ad6141 !important;
-				background: #fffbf9 !important;
-			}
-			.singo-drag-handle {
-				cursor: grab !important;
-				color: #94a3b8 !important;
-				display: flex !important;
-				align-items: center !important;
-				justify-content: center !important;
-				padding: 4px !important;
-				user-select: none !important;
-				transition: color 0.15s ease !important;
-			}
-			.singo-drag-handle:hover {
-				color: #ad6141 !important;
-			}
-			.singo-priority-badge {
-				background: #f1f5f9 !important;
-				color: #475569 !important;
-				font-size: 12px !important;
-				font-weight: 700 !important;
-				width: 28px !important;
-				height: 28px !important;
-				border-radius: 50% !important;
-				display: flex !important;
-				align-items: center !important;
-				justify-content: center !important;
-				flex-shrink: 0 !important;
-				border: 1px solid #e2e8f0 !important;
-			}
-			.optionino-repeater-item.is-default-row .singo-priority-badge {
-				background: #ad6141 !important;
-				color: #ffffff !important;
-				border-color: #ad6141 !important;
-			}
-			.optionino-repeater-seperate-subfields {
-				flex: 1 !important;
-				display: flex !important;
-				align-items: center !important;
-				gap: 15px !important;
-				flex-wrap: wrap !important;
-			}
-			.optionino-repeater-seperate-subfields .optionino-box-option {
-				margin: 0 !important;
-				display: flex !important;
-				align-items: center !important;
-				gap: 10px !important;
-			}
-			.optionino-repeater-seperate-subfields .optionino-form-label {
-				margin: 0 !important;
-				white-space: nowrap !important;
-				font-size: 13px !important;
-			}
-			.optionino-repeater-seperate-subfields .optionino-input {
-				min-width: 220px !important;
-			}
-			.optionino-remove-repeater-item {
-				border: 1px solid #fee2e2 !important;
-				background: #fff5f5 !important;
-				color: #ef4444 !important;
+			.optionino-container .success-text.singo-warning-notice,
+			.optionino-section .success-text.singo-warning-notice,
+			.success-text.singo-warning-notice {
+				display: block !important;
+				background-color: #fef3c7 !important;
+				border: 1px solid #f59e0b !important;
+				color: #92400e !important;
+				padding: 12px 18px !important;
 				border-radius: 8px !important;
-				padding: 6px 12px !important;
-				font-size: 12px !important;
-				cursor: pointer !important;
-				display: inline-flex !important;
-				align-items: center !important;
-				gap: 4px !important;
-				transition: all 0.2s ease !important;
-			}
-			.optionino-remove-repeater-item:hover {
-				background: #ef4444 !important;
-				color: #ffffff !important;
-				border-color: #ef4444 !important;
-			}
-			.optionino-add-repeater-item {
-				background: #ffffff !important;
-				border: 1px dashed #ad6141 !important;
-				color: #ad6141 !important;
-				border-radius: 10px !important;
-				padding: 8px 18px !important;
-				font-size: 13px !important;
+				font-size: 14px !important;
 				font-weight: 600 !important;
-				cursor: pointer !important;
-				display: inline-flex !important;
-				align-items: center !important;
-				gap: 6px !important;
-				margin-top: 10px !important;
-				transition: all 0.2s ease !important;
-			}
-			.optionino-add-repeater-item:hover {
-				background: #ad6141 !important;
-				color: #ffffff !important;
+				text-align: center !important;
+				margin: 10px 0 20px 0 !important;
+				line-height: 1.5 !important;
 			}
 			#singo-log-console,
 			#singo-test-output-box,

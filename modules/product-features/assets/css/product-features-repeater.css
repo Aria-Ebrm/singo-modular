@@ -1,0 +1,272 @@
+/**
+ * Singo Tools - Product Features Repeater Styles (Self-Contained)
+ *
+ * @package SingoTools\Modules\ProductFeatures
+ * @since 4.3.0
+ */
+
+/* Repeater Outer Container */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] {
+    margin-top: 15px !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-container {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 8px 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Individual Repeater Item Row: Sleek, Single Horizontal Line */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 8px 16px !important;
+    min-height: 56px !important;
+    height: auto !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item:hover {
+    border-color: #cbd5e1 !important;
+}
+
+/* Active Default Row State */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.is-default-row {
+    border-color: #ad6141 !important;
+    background: #fffcfb !important;
+    box-shadow: 0 0 0 1px #ad6141 !important;
+}
+
+/* Drag Handle */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .singo-drag-handle {
+    cursor: grab !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px !important;
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+    user-select: none !important;
+    transition: color 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .singo-drag-handle:hover {
+    color: #ad6141 !important;
+}
+
+/* Priority Counter Badge */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .singo-priority-badge {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border: 1px solid #cbd5e1 !important;
+    transition: all 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.is-default-row .singo-priority-badge {
+    background: #ad6141 !important;
+    color: #ffffff !important;
+    border-color: #ad6141 !important;
+}
+
+/* Subfields Container (Inline Flex) */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 16px !important;
+    flex-wrap: nowrap !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Subfield 1: Group Title Input */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="group_title"] {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="group_title"] .optionino-form-label {
+    display: none !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="group_title"] .optionino-input {
+    width: 100% !important;
+    height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="group_title"] .optionino-input:focus {
+    border-color: #ad6141 !important;
+    box-shadow: 0 0 0 1px #ad6141 !important;
+    outline: none !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="group_title"] p {
+    display: none !important;
+}
+
+/* Subfield 2: Default Switcher Box */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="is_default"] {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 4px 12px !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    user-select: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.is-default-row .optionino-repeater-seperate-subfields [repeater-name="is_default"] {
+    background: #fff7ed !important;
+    border-color: #fed7aa !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="is_default"] .optionino-form-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.is-default-row .optionino-repeater-seperate-subfields [repeater-name="is_default"] .optionino-form-label {
+    color: #c2410c !important;
+    font-weight: 700 !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="is_default"] .optionino-switch-box {
+    margin: 0 !important;
+    transform: scale(0.85) !important;
+    transform-origin: center right !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subfields [repeater-name="is_default"] p {
+    display: none !important;
+}
+
+/* Delete Button Box */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subbuttons {
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subbuttons .optionino-remove-repeater-item {
+    background: #fff5f5 !important;
+    border: 1px solid #fecaca !important;
+    color: #ef4444 !important;
+    border-radius: 8px !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subbuttons .optionino-remove-repeater-item:hover {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #ef4444 !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-seperate-subbuttons .optionino-remove-repeater-item svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke: currentColor !important;
+}
+
+/* Add Item Button */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #ffffff !important;
+    border: 1.5px dashed #ad6141 !important;
+    color: #ad6141 !important;
+    border-radius: 8px !important;
+    padding: 9px 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    margin-top: 8px !important;
+    transition: all 0.15s ease !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item:hover {
+    background: #ad6141 !important;
+    color: #ffffff !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+}
+
+/* Sortable States: STABLE & CONTAINED (Zero Layout Shift) */
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.singo-sortable-placeholder {
+    background: #f8fafc !important;
+    border: 2px dashed #ad6141 !important;
+    border-radius: 10px !important;
+    visibility: visible !important;
+    box-sizing: border-box !important;
+    opacity: 0.6 !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-repeater-item.ui-sortable-helper {
+    position: absolute !important;
+    background: #ffffff !important;
+    border: 1.5px solid #ad6141 !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18), 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+    cursor: grabbing !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+    z-index: 99999 !important;
+}

@@ -26,7 +26,7 @@
     var warningText = form.querySelector('.warning-text');
     if (!warningText && saveBox) {
       warningText = document.createElement('span');
-      warningText.className = 'warning-text';
+      warningText.className = 'warning-text singo-warning-notice';
       warningText.style.display = 'none';
       saveBox.appendChild(warningText);
     }
@@ -150,15 +150,43 @@
       }
     }
 
+    // Dedicated Yellow Warning Notification function
     function showWarning(msg) {
       if (errorText) errorText.style.display = 'none';
-      if (successText) successText.style.display = 'none';
+
+      // 1. Top banner: transform successText into prominent Amber-Yellow Warning
+      if (successText) {
+        successText.innerHTML = '<span class="dashicons dashicons-warning" style="font-size: 18px; width: 18px; height: 18px; margin-inline-end: 6px; vertical-align: middle;"></span> ' + msg;
+        successText.className = 'success-text singo-warning-notice';
+        successText.style.cssText = 'display: block !important; background-color: #fef3c7 !important; border: 1px solid #f59e0b !important; color: #92400e !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;';
+        setTimeout(function() {
+          successText.style.display = 'none';
+          successText.className = 'success-text';
+        }, 3500);
+      }
+
+      // 2. Bottom saveBox inline badge
       if (warningText) {
         warningText.innerHTML = '<span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px; margin-inline-end: 4px; vertical-align: middle;"></span> ' + msg;
-        warningText.style.display = 'inline-flex';
+        warningText.style.cssText = 'display: inline-flex !important; align-items: center !important; align-self: center !important; height: 40px !important; line-height: 1 !important; margin: 0 !important; padding: 0 16px !important; border-radius: 8px !important; background-color: #fef3c7 !important; border: 1px solid #f59e0b !important; color: #92400e !important; font-size: 13px !important; font-weight: 600 !important; box-sizing: border-box !important; gap: 6px !important;';
         setTimeout(function() {
           warningText.style.display = 'none';
         }, 3500);
+      }
+    }
+
+    // Dedicated Green Success Notification function
+    function showSuccess(msg) {
+      if (errorText) errorText.style.display = 'none';
+      if (warningText) warningText.style.display = 'none';
+
+      if (successText) {
+        successText.className = 'success-text';
+        successText.style.cssText = 'display: block !important; background-color: #dff8d7 !important; border: 1px solid #d1f5c6 !important; color: #427e1b !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
+        successText.textContent = msg;
+        setTimeout(function() {
+          successText.style.display = 'none';
+        }, 3000);
       }
     }
 
@@ -216,7 +244,7 @@
       updateDeltaBadge();
     }
 
-    // Listen to custom repeater change event dispatched by singo-repeater.js
+    // Listen to custom repeater change event dispatched by product-features-repeater.js
     document.addEventListener('singo:repeater-changed', function(e) {
       if (e.detail && e.detail.repeater) {
         evaluateRepeater(e.detail.repeater);
@@ -302,17 +330,12 @@
           dirtyFields.clear();
           updateDeltaBadge();
 
-          if (successText) {
-            successText.textContent = (response.data && response.data.message) || 'تغییرات با موفقیت ذخیره شد.';
-            successText.style.display = 'inline-flex';
-            setTimeout(function() {
-              successText.style.display = 'none';
-            }, 3000);
-          }
+          showSuccess((response.data && response.data.message) || 'تنظیمات با موفقیت ذخیره شد.');
         } else {
           if (errorText) {
+            errorText.className = 'error-text';
+            errorText.style.cssText = 'display: block !important; background-color: #ffebe8 !important; border: 1px solid #cc0000 !important; color: #dc3232 !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
             errorText.textContent = (response.data && response.data.message) || 'خطا در ذخیره‌سازی اطلاعات.';
-            errorText.style.display = 'inline-flex';
           }
         }
       };
@@ -320,8 +343,9 @@
       xhr.onerror = function() {
         if (OPTNNO) OPTNNO.classList.remove('loading');
         if (errorText) {
+          errorText.className = 'error-text';
+          errorText.style.cssText = 'display: block !important; background-color: #ffebe8 !important; border: 1px solid #cc0000 !important; color: #dc3232 !important; padding: 12px 18px !important; border-radius: 8px !important; font-size: 14px !important; font-weight: 600 !important; text-align: center !important; margin: 10px 0 20px 0 !important; line-height: 1.5 !important;';
           errorText.textContent = 'خطای شبکه رخ داده است. لطفاً اتصال اینترنت خود را بررسی نمایید.';
-          errorText.style.display = 'inline-flex';
         }
       };
 

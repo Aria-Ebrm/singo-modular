@@ -2,7 +2,7 @@
  * Singo Tools - Product Features Repeater Enhancements (Self-Contained)
  * 
  * Provides:
- * - Drag & Drop reordering via jQuery UI Sortable
+ * - Drag & Drop reordering via jQuery UI Sortable with parent containment (zero glitch)
  * - Dynamic priority badges & re-indexing
  * - Single-choice "Default" selector (انتخاب به عنوان پیش‌فرض)
  * - Add / Remove repeater items
@@ -15,7 +15,7 @@
 (function($) {
   'use strict';
 
-  function initOptioninoRepeaters() {
+  function initProductFeaturesRepeater() {
     $('.optionino-repeater-field[data-repeater-name="mu_attribute_groups"]').each(function() {
       var $field = $(this);
       var $container = $field.find('.optionino-repeater-container');
@@ -34,11 +34,29 @@
           handle: '.singo-drag-handle',
           items: '> .optionino-repeater-item',
           axis: 'y',
+          containment: 'parent', // STRICT: Cannot escape or overlap other tabs
           cursor: 'grabbing',
-          opacity: 0.85,
-          placeholder: 'optionino-repeater-item ui-sortable-placeholder',
+          opacity: 0.92,
+          tolerance: 'pointer',
+          forcePlaceholderSize: true,
+          forceHelperSize: true,
+          placeholder: 'optionino-repeater-item singo-sortable-placeholder',
+          helper: function(e, item) {
+            var $clone = item.clone();
+            $clone.css({
+              'width': item.outerWidth() + 'px',
+              'box-sizing': 'border-box',
+              'z-index': 99999
+            });
+            return $clone;
+          },
           start: function(e, ui) {
-            ui.placeholder.height(ui.item.outerHeight());
+            ui.placeholder.css({
+              'height': ui.item.outerHeight() + 'px',
+              'width': ui.item.outerWidth() + 'px',
+              'box-sizing': 'border-box',
+              'visibility': 'visible'
+            });
           },
           stop: function() {
             reindexRepeater($container);
@@ -54,6 +72,12 @@
 
     $items.each(function(index) {
       var $item = $(this);
+
+      // Set placeholder on title input
+      var $titleInput = $item.find('input[type="text"][name*="group_title"]');
+      if ($titleInput.length && !$titleInput.attr('placeholder')) {
+        $titleInput.attr('placeholder', 'عنوان گروه را وارد کنید...');
+      }
 
       // Inject Drag Handle if missing
       if (!$item.find('.singo-drag-handle').length) {
@@ -74,6 +98,8 @@
       var $defaultCheck = $item.find('input[type="checkbox"][name*="is_default"]');
       if ($defaultCheck.length && $defaultCheck.prop('checked')) {
         $item.addClass('is-default-row');
+      } else {
+        $item.removeClass('is-default-row');
       }
     });
 
@@ -102,14 +128,12 @@
       $item.find('input, textarea, select').each(function() {
         var el = this;
         if (el.name) {
-          // Replace trailing _\d+ or _\d+_filled
           el.name = el.name.replace(/_(\d+)(_filled)?$/, function(match, oldIdx, filledSuffix) {
             return '_' + newIdx + (filledSuffix || '');
           });
         }
         if (el.id) {
           el.id = el.id.replace(/_(\d+)$/, '_' + newIdx);
-          // Update matching labels
           var $label = $item.find('label[for="' + el.id.replace(/_\d+$/, '') + '_' + newIdx + '"]');
           if ($label.length) {
             $label.attr('for', el.id);
@@ -153,7 +177,7 @@
     reindexRepeater($container);
     setupRepeaterItems($container);
 
-    // Focus first input of new row
+    // Focus input of new row
     $newItem.find('input[type="text"]').first().focus();
 
     // Trigger Delta Saving event
@@ -169,7 +193,7 @@
     var $remaining = $container.children('.optionino-repeater-item');
 
     if ($remaining.length <= 1) {
-      alert('حداقل یک ردیف باید در لیست باقی بماند.');
+      alert('حداقل یک گروه باید در جدول باقی بماند.');
       return;
     }
 
@@ -226,9 +250,9 @@
 
   // Initialize on DOM Ready and on Tab switches
   $(document).ready(function() {
-    initOptioninoRepeaters();
+    initProductFeaturesRepeater();
     $(document).on('click', '.tablinks', function() {
-      setTimeout(initOptioninoRepeaters, 50);
+      setTimeout(initProductFeaturesRepeater, 50);
     });
   });
 
