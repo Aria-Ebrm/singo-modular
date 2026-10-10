@@ -164,6 +164,14 @@ class Singo_Tools_Optionino {
 		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_script( 'wp-color-picker' );
 
+		wp_enqueue_script(
+			'singo-delta-save',
+			SINGO_TOOLS_URL . 'assets/js/singo-delta-save.js',
+			array( 'jquery' ),
+			SINGO_TOOLS_VERSION,
+			true
+		);
+
 		$color_picker_js = "
 			jQuery(document).ready(function($) {
 				function initOptioninoColorPickers() {

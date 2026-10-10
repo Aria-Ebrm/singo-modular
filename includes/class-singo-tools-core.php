@@ -54,6 +54,8 @@ class Singo_Tools_Core {
 		require_once SINGO_TOOLS_PATH . 'includes/Core/AbstractModule.php';
 		require_once SINGO_TOOLS_PATH . 'includes/Core/ManifestManager.php';
 		require_once SINGO_TOOLS_PATH . 'includes/Core/ModuleManager.php';
+		require_once SINGO_TOOLS_PATH . 'includes/Core/DeltaManager.php';
+		\SingoTools\Core\DeltaManager::get_instance();
 
 		// Load Optionino Framework and Settings strictly in Admin / AJAX
 		if ( is_admin() || wp_doing_ajax() ) {
@@ -171,6 +173,11 @@ class Singo_Tools_Core {
 	 * Purge popular caching plugins when settings are updated and manage currency toggle state.
 	 */
 	public function purge_cache_on_save( mixed $old_value, mixed $value ): void {
+		// Delta check: Skip all cache flushes if values are identical
+		if ( $old_value === $value ) {
+			return;
+		}
+
 		// Handle Currency Converter Activation/Deactivation Logic
 		$old_currency_state = isset( $old_value['enable_currency_converter'] ) ? filter_var( $old_value['enable_currency_converter'], FILTER_VALIDATE_BOOLEAN ) : false;
 		$new_currency_state = isset( $value['enable_currency_converter'] ) ? filter_var( $value['enable_currency_converter'], FILTER_VALIDATE_BOOLEAN ) : false;
