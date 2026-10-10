@@ -330,7 +330,7 @@ class Singo_Product_Swatches {
 	 */
 	public function render_frontend_scripts(): void {
 		if ( ! is_product() && ! has_block( 'woocommerce/product-template' ) && ! is_shop() && ! is_product_taxonomy() ) {
-			// Don't render unless on product-related pages
+			return;
 		}
 		?>
 		<script>

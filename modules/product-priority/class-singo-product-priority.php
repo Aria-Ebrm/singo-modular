@@ -297,8 +297,11 @@ class Singo_Product_Priority {
 		if ( $shop_id > 0 && function_exists( 'rocket_clean_post' ) ) {
 			rocket_clean_post( $shop_id );
 		}
-		if ( function_exists( 'wp_cache_flush' ) ) {
-			wp_cache_flush();
+		if ( $post_id > 0 ) {
+			clean_post_cache( $post_id );
+			if ( function_exists( 'wc_delete_product_transients' ) ) {
+				wc_delete_product_transients( $post_id );
+			}
 		}
 	}
 
