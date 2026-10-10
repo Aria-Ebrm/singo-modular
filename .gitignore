@@ -1,0 +1,29 @@
+# ==============================================================================
+# Singo Tools .gitignore
+# ==============================================================================
+
+# OS & Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+*.zip
+*.tmp
+*.bak
+
+# IDE & Editor Settings
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Debugging & Runtime Logs
+debug.log
+singo-debug.log
+
+# ------------------------------------------------------------------------------
+# GitHub Markdown Policy:
+# ONLY README.md is published/committed to GitHub.
+# Internal AI rules (AGENTS.md, GEMINI.md, PROJECT_RULES.md, etc.) are kept locally only.
+# ------------------------------------------------------------------------------
+/*.md
+!/README.md
