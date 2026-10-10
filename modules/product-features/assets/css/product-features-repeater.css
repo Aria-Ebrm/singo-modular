@@ -306,32 +306,47 @@
     stroke: currentColor !important;
 }
 
-/* Add Item Button */
+/* Add Item Button: Dashed border with rounded corners and Persian label */
 .optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 40px !important;
+    padding: 0 20px !important;
     background: #ffffff !important;
-    border: 1.5px dashed #ad6141 !important;
-    color: #ad6141 !important;
-    border-radius: 8px !important;
-    padding: 9px 20px !important;
+    border: 1.5px dashed var(--optionino-main-color, #ad6141) !important;
+    color: var(--optionino-main-color, #ad6141) !important;
+    border-radius: 9px !important;
+    font-family: inherit !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
-    margin-top: 8px !important;
-    transition: all 0.15s ease !important;
+    margin-top: 10px !important;
+    margin-bottom: 6px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item:hover {
-    background: #ad6141 !important;
-    color: #ffffff !important;
+    background: #fdfaf8 !important;
+    border-color: #8c4b30 !important;
+    color: #8c4b30 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 5px rgba(173, 97, 65, 0.08) !important;
 }
 
 .optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 17px !important;
+    height: 17px !important;
     stroke: currentColor !important;
+    vertical-align: middle !important;
+}
+
+.optionino-repeater-field[data-repeater-name="mu_attribute_groups"] .optionino-add-repeater-item .singo-add-btn-text {
+    line-height: 1 !important;
+    color: inherit !important;
+    font-weight: 600 !important;
 }
 
 /* Drag & Drop States (Native HTML5 - 100% Contained, Zero Jumping) */

@@ -60,11 +60,12 @@ class ProductFeaturesModule extends AbstractModule {
 					'desc'  => 'می‌توانید از این شورت‌کد در المنتور، برگه‌سازها، چیدمان محصول یا تب‌های اختصاصی قالب استفاده نمایید.',
 				),
 				array(
-					'id'     => 'mu_attribute_groups',
-					'type'   => 'repeater',
-					'title'  => 'مدیریت و اولویت‌بندی گروه‌ها',
-					'desc'   => 'برای تغییر اولویت گروه‌ها، آن‌ها را با ماوس بکشید و رها کنید (Drag & Drop). یک گروه را به عنوان پیش‌فرض مشخص نمایید.',
-					'fields' => array(
+					'id'           => 'mu_attribute_groups',
+					'type'         => 'repeater',
+					'title'        => 'مدیریت و اولویت‌بندی گروه‌ها',
+					'button_title' => 'افزودن گروه',
+					'desc'         => 'برای تغییر اولویت گروه‌ها، آن‌ها را با ماوس بکشید و رها کنید (Drag & Drop). یک گروه را به عنوان پیش‌فرض مشخص نمایید.',
+					'fields'       => array(
 						array(
 							'id'    => 'group_title',
 							'type'  => 'text',

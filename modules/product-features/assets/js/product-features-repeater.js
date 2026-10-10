@@ -88,9 +88,19 @@
       // Enhance existing items
       setupRepeaterItems($container);
 
+      // Setup Add Button label and icon
+      setupAddButtonText($field);
+
       // Enable 100% Native HTML5 Drag & Drop (Zero Glitch, Zero RTL jumping, Native Compositor)
       initHTML5DragAndDrop($container, $field);
     });
+  }
+
+  function setupAddButtonText($field) {
+    var $addBtn = $field.find('.optionino-add-repeater-item');
+    if ($addBtn.length && !$addBtn.find('.singo-add-btn-text').length) {
+      $addBtn.append('<span class="singo-add-btn-text">افزودن گروه</span>');
+    }
   }
 
   function initHTML5DragAndDrop($container, $field) {
