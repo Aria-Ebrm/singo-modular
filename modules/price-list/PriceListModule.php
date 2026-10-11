@@ -37,7 +37,7 @@ class PriceListModule extends AbstractModule {
 	}
 
 	public static function is_context_valid(): bool {
-		return class_exists( 'WooCommerce' );
+		return class_exists( 'WooCommerce' ) && ( is_admin() || wp_doing_ajax() );
 	}
 
 	public function get_optionino_tab(): ?array {

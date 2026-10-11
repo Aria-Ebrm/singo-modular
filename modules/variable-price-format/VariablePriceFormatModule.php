@@ -72,7 +72,9 @@ class VariablePriceFormatModule extends AbstractModule {
 	public function init(): void {
 		parent::init();
 
-		add_filter( 'woocommerce_variable_price_html', array( $this, 'format_variable_product_price' ), 99, 2 );
+		if ( ! is_admin() || wp_doing_ajax() ) {
+			add_filter( 'woocommerce_variable_price_html', array( $this, 'format_variable_product_price' ), 99, 2 );
+		}
 	}
 
 	/**

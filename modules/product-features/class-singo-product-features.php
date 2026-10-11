@@ -51,23 +51,27 @@ class Singo_Product_Features {
 	 * Initialize hooks.
 	 */
 	private function init_hooks(): void {
-		add_filter( 'pre_update_option_singo_tools_options', array( $this, 'intercept_option_save' ), 10, 2 );
-		add_action( 'update_option_singo_tools_options', array( $this, 'purge_cache_on_save' ) );
+		if ( is_admin() || wp_doing_ajax() ) {
+			add_filter( 'pre_update_option_singo_tools_options', array( $this, 'intercept_option_save' ), 10, 2 );
+			add_action( 'update_option_singo_tools_options', array( $this, 'purge_cache_on_save' ) );
+		}
 
 		$enabled = singo_tools_get_option( 'enable_product_features', true );
 		if ( ! $enabled ) {
 			return;
 		}
 
-		// WooCommerce Attribute UI Integration
-		add_action( 'woocommerce_after_add_attribute_fields', array( $this, 'add_attribute_group_field' ) );
-		add_action( 'woocommerce_after_edit_attribute_fields', array( $this, 'edit_attribute_group_field' ) );
-		add_action( 'woocommerce_attribute_added', array( $this, 'save_attribute_group' ), 10, 2 );
-		add_action( 'woocommerce_attribute_updated', array( $this, 'save_attribute_group' ), 10, 2 );
-		add_action( 'woocommerce_attribute_deleted', array( $this, 'delete_attribute_group' ), 10, 3 );
-		
-		// Fallback for themes/plugins that override the admin template and remove the hooks
-		add_action( 'admin_footer', array( $this, 'admin_footer_js_fallback' ) );
+		// WooCommerce Attribute UI Integration (Strictly Admin Only)
+		if ( is_admin() ) {
+			add_action( 'woocommerce_after_add_attribute_fields', array( $this, 'add_attribute_group_field' ) );
+			add_action( 'woocommerce_after_edit_attribute_fields', array( $this, 'edit_attribute_group_field' ) );
+			add_action( 'woocommerce_attribute_added', array( $this, 'save_attribute_group' ), 10, 2 );
+			add_action( 'woocommerce_attribute_updated', array( $this, 'save_attribute_group' ), 10, 2 );
+			add_action( 'woocommerce_attribute_deleted', array( $this, 'delete_attribute_group' ), 10, 3 );
+
+			// Fallback for themes/plugins that override the admin template and remove the hooks
+			add_action( 'admin_footer', array( $this, 'admin_footer_js_fallback' ) );
+		}
 	}
 
 	/**

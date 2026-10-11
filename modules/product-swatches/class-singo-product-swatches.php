@@ -39,26 +39,26 @@ class Singo_Product_Swatches {
 	 * Initialize hooks.
 	 */
 	private function init_hooks(): void {
-		// 1. تضمین ارسال همیشگی HTML قیمت و درصد تخفیف در آبجکت جاوا اسکریپت ووکامرس
+		// 1. تضمین ارسال همیشگی HTML قیمت و درصد تخفیف در آبجکت جاوا اسکریپت ووکامرس (Shared)
 		add_filter( 'woocommerce_available_variation', array( $this, 'enforce_variation_data_payload' ), 10, 3 );
 
-		// 2. پنل ادمین: تنظیمات ویژگی‌ها (سواچ رنگی)
-		add_action( 'woocommerce_after_add_attribute_fields', array( $this, 'add_attribute_field' ) );
-		add_action( 'woocommerce_after_edit_attribute_fields', array( $this, 'edit_attribute_field' ) );
-		add_action( 'woocommerce_attribute_added', array( $this, 'save_attribute_type' ) );
-		add_action( 'woocommerce_attribute_updated', array( $this, 'save_attribute_type' ) );
+		// 2. پنل ادمین: تنظیمات ویژگی‌ها و پالت رنگی (Strictly Admin Only)
+		if ( is_admin() ) {
+			add_action( 'woocommerce_after_add_attribute_fields', array( $this, 'add_attribute_field' ) );
+			add_action( 'woocommerce_after_edit_attribute_fields', array( $this, 'edit_attribute_field' ) );
+			add_action( 'woocommerce_attribute_added', array( $this, 'save_attribute_type' ) );
+			add_action( 'woocommerce_attribute_updated', array( $this, 'save_attribute_type' ) );
 
-		// 3. مدیریت فیلدهای آیتم‌های ویژگی (Terms)
-		add_action( 'admin_init', array( $this, 'register_term_hooks' ) );
+			// مدیریت فیلدهای آیتم‌های ویژگی (Terms)
+			add_action( 'admin_init', array( $this, 'register_term_hooks' ) );
 
-		// 4. لود استایل و کالرپیکر در پنل ادمین
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 99 );
+			// لود استایل و کالرپیکر در پنل ادمین
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 99 );
+		}
 
-		// 5. رندر ساختار سواچ در فرانت‌اند
-		add_filter( 'woocommerce_dropdown_variation_attribute_options_html', array( $this, 'render_swatch_dropdown_html' ), 10, 2 );
-
-		// 6. اسکریپت تعاملی سواچ در فوتر فرانت‌اند
+		// 3. رندر ساختار سواچ و اسکریپت تعاملی در فرانت‌اند (Strictly Frontend Only)
 		if ( ! is_admin() ) {
+			add_filter( 'woocommerce_dropdown_variation_attribute_options_html', array( $this, 'render_swatch_dropdown_html' ), 10, 2 );
 			add_action( 'wp_footer', array( $this, 'render_frontend_scripts' ), 99 );
 		}
 	}

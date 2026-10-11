@@ -15,14 +15,15 @@ class Singo_Currency_Converter {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Parent / Simple Product Fields
-		add_action( 'woocommerce_product_options_general_product_data', array( $this, 'add_currency_selection_fields' ) );
-		add_action( 'woocommerce_admin_process_product_object', array( $this, 'save_product_currency_meta' ) );
+		// Parent / Simple & Variable Product Admin Meta Fields (Strictly Admin Only)
+		if ( is_admin() ) {
+			add_action( 'woocommerce_product_options_general_product_data', array( $this, 'add_currency_selection_fields' ) );
+			add_action( 'woocommerce_admin_process_product_object', array( $this, 'save_product_currency_meta' ) );
 
-		// Variable Product Variation Fields
-		add_action( 'woocommerce_variation_options_pricing', array( $this, 'add_variation_currency_fields' ), 10, 3 );
-		add_action( 'woocommerce_save_product_variation', array( $this, 'save_variation_currency_meta' ), 10, 2 );
-		add_action( 'woocommerce_admin_process_variation_object', array( $this, 'process_variation_object_currency_meta' ), 10, 2 );
+			add_action( 'woocommerce_variation_options_pricing', array( $this, 'add_variation_currency_fields' ), 10, 3 );
+			add_action( 'woocommerce_save_product_variation', array( $this, 'save_variation_currency_meta' ), 10, 2 );
+			add_action( 'woocommerce_admin_process_variation_object', array( $this, 'process_variation_object_currency_meta' ), 10, 2 );
+		}
 
 		// Dynamic price filters for Simple Products
 		add_filter( 'woocommerce_product_get_price', array( $this, 'get_dynamic_converted_price' ), 99, 2 );

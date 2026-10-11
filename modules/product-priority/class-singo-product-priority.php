@@ -39,29 +39,27 @@ class Singo_Product_Priority {
 	 * Initialize hooks.
 	 */
 	private function init_hooks(): void {
-		// 1. Admin product list columns
-		add_filter( 'manage_edit-product_columns', array( $this, 'add_product_priority_column' ), 20 );
-		add_filter( 'manage_edit-product_sortable_columns', array( $this, 'make_product_star_column_sortable' ) );
-		add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_priority_column' ), 10, 2 );
+		// 1. Admin product list columns, submitbox, and AJAX (Strictly Admin / AJAX)
+		if ( is_admin() || wp_doing_ajax() ) {
+			add_filter( 'manage_edit-product_columns', array( $this, 'add_product_priority_column' ), 20 );
+			add_filter( 'manage_edit-product_sortable_columns', array( $this, 'make_product_star_column_sortable' ) );
+			add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_priority_column' ), 10, 2 );
 
-		// 2. Submitbox on edit product screen
-		add_action( 'post_submitbox_misc_actions', array( $this, 'render_star_priority_in_submitbox' ) );
-		add_action( 'save_post_product', array( $this, 'save_submitbox_star_rank' ), 10, 2 );
+			add_action( 'post_submitbox_misc_actions', array( $this, 'render_star_priority_in_submitbox' ) );
+			add_action( 'save_post_product', array( $this, 'save_submitbox_star_rank' ), 10, 2 );
 
-		// 3. Admin assets
-		add_action( 'admin_head', array( $this, 'product_star_column_style' ) );
-		add_action( 'admin_footer', array( $this, 'star_priority_ajax_script' ) );
+			add_action( 'admin_head', array( $this, 'product_star_column_style' ) );
+			add_action( 'admin_footer', array( $this, 'star_priority_ajax_script' ) );
 
-		// 4. AJAX handler
-		add_action( 'wp_ajax_save_product_star_rank', array( $this, 'save_star_rank_callback' ) );
+			add_action( 'wp_ajax_save_product_star_rank', array( $this, 'save_star_rank_callback' ) );
+		}
 
-		// 5. JetWooBuilder query args
+		// 2. Query ordering in Frontend & JetWooBuilder
 		add_filter( 'jet-woo-builder/shortcodes/jet-woo-products/query-args', array( $this, 'jet_woo_star_priority_query_args' ), 20, 2 );
 		add_filter( 'jet-woo-builder/shortcodes/jet-woo-products/final-query-args', array( $this, 'jet_woo_star_priority_query_args' ), 20, 2 );
 		add_filter( 'jet-woo-builder/shortcodes/jet-woo-products-list/query-args', array( $this, 'jet_woo_star_priority_query_args' ), 20, 2 );
 		add_filter( 'jet-woo-builder/shortcodes/jet-woo-products-list/final-query-args', array( $this, 'jet_woo_star_priority_query_args' ), 20, 2 );
 
-		// 6. Posts clauses for ordering
 		add_filter( 'posts_clauses', array( $this, 'apply_five_star_priority_ordering' ), 99, 2 );
 	}
 

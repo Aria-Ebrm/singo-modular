@@ -33,11 +33,11 @@ class ProductFeaturesModule extends AbstractModule {
 	}
 
 	public static function is_enabled(): bool {
-		return true;
+		return (bool) singo_tools_get_option( 'enable_product_features', true );
 	}
 
 	public static function is_context_valid(): bool {
-		return true;
+		return class_exists( 'WooCommerce' );
 	}
 
 	public function get_optionino_tab(): ?array {
@@ -85,7 +85,9 @@ class ProductFeaturesModule extends AbstractModule {
 	public function init(): void {
 		parent::init();
 
-		add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
+		if ( is_admin() ) {
+			add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
+		}
 
 		$legacy_init = $this->get_path( 'product-features.php' );
 		if ( file_exists( $legacy_init ) ) {
