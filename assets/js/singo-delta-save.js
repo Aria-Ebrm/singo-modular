@@ -272,8 +272,127 @@
       }
     }, true);
 
+    // Initialize Shortcode Copy Buttons across all shortcode fields (Image 2 design)
+    function initShortcodeCopyWidgets() {
+      var shortcodeInputs = document.querySelectorAll('#mu_shortcode_info, #product_thumbnail_features_shortcode, input[data-singo-shortcode="true"]');
+      shortcodeInputs.forEach(function(input) {
+        if (input.getAttribute('data-singo-copy-ready')) return;
+        input.setAttribute('data-singo-copy-ready', 'true');
+        input.setAttribute('readonly', 'readonly');
+
+        // Ensure default shortcode value is populated if empty
+        if (!input.value) {
+          if (input.id === 'product_thumbnail_features_shortcode') {
+            input.value = '[product_features_boxes limit="4"]';
+          } else if (input.id === 'mu_shortcode_info') {
+            input.value = '[dynamic_product_specs]';
+          }
+        }
+
+        var parentWrapper = input.parentElement;
+        if (!parentWrapper || !parentWrapper.classList.contains('singo-shortcode-field-wrapper')) {
+          var wrapper = document.createElement('div');
+          wrapper.className = 'singo-shortcode-field-wrapper';
+          input.parentNode.insertBefore(wrapper, input);
+          wrapper.appendChild(input);
+
+          var copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'singo-copy-shortcode-btn';
+          copyBtn.title = 'کپی کردن شورت‌کد';
+          copyBtn.innerHTML = '<span class="dashicons dashicons-admin-page"></span><span class="singo-copy-btn-text">کپی شورت‌کد</span>';
+          wrapper.appendChild(copyBtn);
+
+          copyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var shortcodeVal = input.value || '';
+
+            function setCopied() {
+              copyBtn.classList.add('is-copied');
+              copyBtn.innerHTML = '<span class="dashicons dashicons-yes"></span><span class="singo-copy-btn-text">کپی شد!</span>';
+              setTimeout(function() {
+                copyBtn.classList.remove('is-copied');
+                copyBtn.innerHTML = '<span class="dashicons dashicons-admin-page"></span><span class="singo-copy-btn-text">کپی شورت‌کد</span>';
+              }, 2000);
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(shortcodeVal).then(setCopied).catch(function() {
+                input.focus();
+                input.select();
+                try {
+                  document.execCommand('copy');
+                  setCopied();
+                } catch(err) {}
+              });
+            } else {
+              input.focus();
+              input.select();
+              try {
+                document.execCommand('copy');
+                setCopied();
+              } catch(err) {}
+            }
+          });
+        }
+      });
+    }
+
+    // Initialize Educational Guide Cards inside Optionino conditional containers
+    function initGuideCards() {
+      if (!window.singoGuidesData) return;
+      Object.keys(window.singoGuidesData).forEach(function(fieldId) {
+        var container = document.getElementById('container-' + fieldId + '-0');
+        if (!container || container.querySelector('.singo-module-guide-card')) return;
+
+        var guide = window.singoGuidesData[fieldId];
+        var card = document.createElement('div');
+        card.className = 'singo-module-guide-card';
+
+        var headerHtml = '';
+        if (guide.title) {
+          headerHtml = '<div class="singo-module-guide-header">' +
+            '<span class="dashicons ' + (guide.icon || 'dashicons-info') + '"></span>' +
+            '<span>' + guide.title + '</span>' +
+          '</div>';
+        }
+
+        var itemsHtml = '';
+        if (Array.isArray(guide.items) && guide.items.length) {
+          itemsHtml = '<ul class="singo-module-guide-list">';
+          guide.items.forEach(function(itemText, idx) {
+            var stepNum = idx + 1;
+            itemsHtml += '<li class="singo-module-guide-item">' +
+              '<span class="singo-module-guide-step-badge">' + stepNum + '</span>' +
+              '<span class="singo-module-guide-step-text">' + itemText + '</span>' +
+            '</li>';
+          });
+          itemsHtml += '</ul>';
+        }
+
+        card.innerHTML = headerHtml + itemsHtml;
+        container.appendChild(card);
+      });
+    }
+
+    // Initialize widgets immediately and on tab switches
+    initShortcodeCopyWidgets();
+    initGuideCards();
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.closest && e.target.closest('.tablinks')) {
+        setTimeout(function() {
+          initShortcodeCopyWidgets();
+          initGuideCards();
+        }, 60);
+      }
+    });
+
     // Initial snapshot capture (short delay to ensure Optionino and color pickers ready)
-    setTimeout(captureInitialSnapshot, 150);
+    setTimeout(function() {
+      initShortcodeCopyWidgets();
+      initGuideCards();
+      captureInitialSnapshot();
+    }, 150);
 
     // Capture Phase Form Interception (fires BEFORE Optionino's default submit listener)
     form.addEventListener('submit', function(e) {

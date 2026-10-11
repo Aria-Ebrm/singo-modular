@@ -17,7 +17,7 @@
 
   function initShortcodeCopy() {
     var $input = $('#mu_shortcode_info');
-    if (!$input.length || $input.data('singo-copy-ready')) {
+    if (!$input.length || $input.data('singo-copy-ready') || $input.attr('data-singo-copy-ready') || $input.parent().hasClass('singo-shortcode-field-wrapper')) {
       return;
     }
     $input.data('singo-copy-ready', true);

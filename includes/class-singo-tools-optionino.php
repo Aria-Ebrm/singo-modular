@@ -174,6 +174,25 @@ class Singo_Tools_Optionino {
 			true
 		);
 
+		// Localize educational guide configurations for dynamic Optionino conditional rendering
+		$guide_configs = array();
+		$modules       = \SingoTools\Core\ModuleManager::get_instance()->get_all_modules();
+		foreach ( $modules as $module ) {
+			$fields = $module::is_other_tool() ? $module->get_optionino_fields() : ( $module->get_optionino_tab()['fields'] ?? array() );
+			if ( is_array( $fields ) ) {
+				foreach ( $fields as $f ) {
+					if ( isset( $f['type'] ) && $f['type'] === 'guide' && ! empty( $f['id'] ) ) {
+						$guide_configs[ $f['id'] ] = array(
+							'title' => $f['guide_title'] ?? ( $f['title'] ?? '' ),
+							'icon'  => $f['guide_icon'] ?? 'dashicons-info',
+							'items' => $f['guide_items'] ?? array(),
+						);
+					}
+				}
+			}
+		}
+		wp_localize_script( 'singo-delta-save', 'singoGuidesData', $guide_configs );
+
 		$color_picker_js = "
 			jQuery(document).ready(function($) {
 				function initOptioninoColorPickers() {
@@ -308,6 +327,153 @@ class Singo_Tools_Optionino {
 				word-break: break-all !important;
 				word-wrap: break-word !important;
 				box-sizing: border-box !important;
+			}
+
+			/* Shortcode Field Wrapper & Native Copy Button (Matching Image 2) */
+			.singo-shortcode-field-wrapper {
+				display: flex !important;
+				align-items: center !important;
+				gap: 12px !important;
+				width: 100% !important;
+				max-width: 580px !important;
+				box-sizing: border-box !important;
+			}
+			.singo-shortcode-field-wrapper .optionino-input {
+				flex: 1 !important;
+				height: 42px !important;
+				border: 1px solid #cbd5e1 !important;
+				border-radius: 9px !important;
+				padding: 0 14px !important;
+				font-size: 14px !important;
+				font-weight: 600 !important;
+				font-family: monospace !important;
+				color: #1e293b !important;
+				box-sizing: border-box !important;
+				background: #f8fafc !important;
+				direction: ltr !important;
+				text-align: center !important;
+				cursor: pointer !important;
+				transition: all 0.15s ease !important;
+			}
+			.singo-shortcode-field-wrapper .optionino-input:focus {
+				border-color: #ad6141 !important;
+				background: #ffffff !important;
+				box-shadow: 0 0 0 2px rgba(173, 97, 65, 0.15) !important;
+				outline: none !important;
+			}
+			.singo-copy-shortcode-btn {
+				display: inline-flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				gap: 8px !important;
+				height: 42px !important;
+				padding: 0 18px !important;
+				background: var(--optionino-main-color, #ad6141) !important;
+				color: #ffffff !important;
+				border: 1.5px solid transparent !important;
+				border-radius: 9px !important;
+				font-family: inherit !important;
+				font-size: 13px !important;
+				font-weight: 600 !important;
+				cursor: pointer !important;
+				white-space: nowrap !important;
+				flex-shrink: 0 !important;
+				box-sizing: border-box !important;
+				transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+			}
+			.singo-copy-shortcode-btn:hover {
+				background: #8c4b30 !important;
+				transform: translateY(-1px) !important;
+				box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+			}
+			.singo-copy-shortcode-btn:active {
+				transform: translateY(0) !important;
+			}
+			.singo-copy-shortcode-btn .dashicons {
+				font-size: 17px !important;
+				width: 17px !important;
+				height: 17px !important;
+				line-height: 17px !important;
+				vertical-align: middle !important;
+				color: inherit !important;
+			}
+			.singo-copy-shortcode-btn.is-copied {
+				background: #16a34a !important;
+				border-color: #15803d !important;
+				color: #ffffff !important;
+			}
+
+			/* Educational Guide Cards in Optionino */
+			.optionino-box-option:has(.singo-module-guide-card),
+			.optionino-box-option[id*=\"_guide-\"] {
+				flex-direction: column !important;
+				align-items: stretch !important;
+				border-top: none !important;
+				padding-top: 0px !important;
+				margin-top: -8px !important;
+				margin-bottom: 24px !important;
+			}
+			.singo-module-guide-card {
+				width: 100% !important;
+				background: #faf8f6 !important;
+				border: 1px solid #ebd9d0 !important;
+				border-right: 4px solid var(--optionino-main-color, #ad6141) !important;
+				border-radius: 10px !important;
+				padding: 16px 20px !important;
+				box-sizing: border-box !important;
+				font-family: inherit !important;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+			}
+			.singo-module-guide-header {
+				display: flex !important;
+				align-items: center !important;
+				gap: 8px !important;
+				font-size: 14px !important;
+				font-weight: 700 !important;
+				color: #7c351b !important;
+				margin-bottom: 12px !important;
+			}
+			.singo-module-guide-header .dashicons {
+				font-size: 19px !important;
+				width: 19px !important;
+				height: 19px !important;
+				line-height: 19px !important;
+				color: var(--optionino-main-color, #ad6141) !important;
+			}
+			.singo-module-guide-list {
+				list-style: none !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				display: flex !important;
+				flex-direction: column !important;
+				gap: 9px !important;
+			}
+			.singo-module-guide-item {
+				display: flex !important;
+				align-items: flex-start !important;
+				gap: 10px !important;
+				font-size: 13.5px !important;
+				line-height: 1.75 !important;
+				color: #374151 !important;
+			}
+			.singo-module-guide-step-badge {
+				display: inline-flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				min-width: 22px !important;
+				height: 22px !important;
+				background: rgba(173, 97, 65, 0.12) !important;
+				color: var(--optionino-main-color, #ad6141) !important;
+				border-radius: 50% !important;
+				font-size: 11.5px !important;
+				font-weight: 700 !important;
+				line-height: 1 !important;
+				margin-top: 2px !important;
+				flex-shrink: 0 !important;
+			}
+			.singo-module-guide-step-text {
+				flex: 1 !important;
 			}
 		";
 		wp_add_inline_style( 'singo-tools-admin-style', $page_css );

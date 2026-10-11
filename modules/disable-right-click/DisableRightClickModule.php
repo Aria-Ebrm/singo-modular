@@ -53,6 +53,19 @@ class DisableRightClickModule extends AbstractModule {
 				'desc'    => self::get_description(),
 				'default' => false,
 			),
+			array(
+				'id'          => 'disable_right_click_guide',
+				'type'        => 'guide',
+				'title'       => 'راهنمای محافظت از محتوا و کلیک راست',
+				'require'     => array( array( 'disable_right_click', '==', true ) ),
+				'guide_title' => 'سازوکار محافظت از محتوا و تصاویر سایت',
+				'guide_icon'  => 'dashicons-hidden',
+				'guide_items' => array(
+					'مسدودسازی کلیک راست و انتخاب متن: منوی کلیک راست (Context Menu)، درگ کردن تصاویر و انتخاب متن با ماوس در سراسر فرانت‌اند سایت برای بازدیدکنندگان غیرفعال می‌شود.',
+					'جلوگیری از کلیدهای میانبر کپی: کلیدهای پرکاربرد مانند Ctrl+C (کپی)، Ctrl+U (مشاهده سورس کد صفحه)، و کلیدهای باز کردن ابزار توسعه مرورگر مسدود می‌گردند.',
+					'معافیت خودکار مدیران سایت: به منظور سهولت در ویرایش و مدیریت فروشگاه، این محدودیت‌ها برای مدیران لاگین‌شده وردپرس اعمال نمی‌شود.',
+				),
+			),
 		);
 	}
 
