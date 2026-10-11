@@ -47,21 +47,39 @@ class Singo_Neshan_Map_Widget extends Widget_Base {
 			)
 		);
 
-		$default_api_key = (string) singo_tools_get_option( 'neshan_map_default_api_key', '' );
+		$global_api_key = (string) singo_tools_get_option( 'neshan_map_default_api_key', '' );
+		$has_key        = ! empty( $global_api_key ) && 'web.' !== $global_api_key;
+		$settings_url   = admin_url( 'admin.php?page=singo-tools' );
 
 		$this->add_control(
-			'api_key',
+			'api_key_notice',
 			array(
-				'label'       => esc_html__( 'کلید وب API نشان', 'singo-tools' ),
-				'type'        => Controls_Manager::TEXT,
-				'default'     => $default_api_key,
-				'placeholder' => 'web.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-				'description' => sprintf(
-					/* translators: %s: Neshan Platform link */
-					esc_html__( 'کلید وب API خود را از %s دریافت و وارد کنید.', 'singo-tools' ),
-					'<a href="https://platform.neshan.org/panel/api-key" target="_blank" rel="noopener noreferrer">' . esc_html__( 'پنل توسعه‌دهندگان نشان', 'singo-tools' ) . '</a>'
+				'type' => Controls_Manager::RAW_HTML,
+				'raw'  => sprintf(
+					'<div style="background: %s; border: 1px solid %s; border-right: 4px solid %s; padding: 12px 14px; border-radius: 6px; font-size: 12.5px; line-height: 1.6; direction: rtl; text-align: right; margin-bottom: 12px;">' .
+						'<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">' .
+							'<strong style="color: #1e293b; font-size: 13px;">%s</strong>' .
+							'<span style="font-size: 11px; font-weight: 700; color: %s; background: %s; padding: 2px 8px; border-radius: 12px;">%s</span>' .
+						'</div>' .
+						'<p style="color: #64748b; margin: 0 0 10px 0; font-size: 12px;">%s</p>' .
+						'<a href="%s" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%%; padding: 7px 12px; background: #ad6141; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 12px; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(173,97,65,0.2);">' .
+							'<span class="dashicons dashicons-admin-generic" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>' .
+							'%s' .
+						'</a>' .
+					'</div>',
+					$has_key ? '#f0fdf4' : '#fffbeb',
+					$has_key ? '#bbf7d0' : '#fde68a',
+					$has_key ? '#16a34a' : '#d97706',
+					esc_html__( 'کلید وب API نشان', 'singo-tools' ),
+					$has_key ? '#16a34a' : '#d97706',
+					$has_key ? '#dcfce7' : '#fef3c7',
+					$has_key ? esc_html__( 'متصل و سراسری ✓', 'singo-tools' ) : esc_html__( 'تنظیم‌نشده', 'singo-tools' ),
+					$has_key
+						? esc_html__( 'کلید API به صورت خودکار از تنظیمات جعبه ابزار سینگو خوانده می‌شود.', 'singo-tools' )
+						: esc_html__( 'برای نمایش نقشه، ابتدا باید کلید وب API را در تنظیمات جعبه ابزار سینگو وارد نمایید.', 'singo-tools' ),
+					esc_url( $settings_url ),
+					esc_html__( 'رفتن به تنظیمات افزونه برای تغییر کلید ↗', 'singo-tools' )
 				),
-				'label_block' => true,
 			)
 		);
 
@@ -264,9 +282,10 @@ class Singo_Neshan_Map_Widget extends Widget_Base {
 	protected function render(): void {
 		$settings = $this->get_settings_for_display();
 
-		$api_key = ! empty( $settings['api_key'] ) ? trim( (string) $settings['api_key'] ) : '';
-		if ( empty( $api_key ) ) {
-			$api_key = (string) singo_tools_get_option( 'neshan_map_default_api_key', '' );
+		// Centralized API key from Singo Tools settings (with fallback to legacy per-widget key if any)
+		$api_key = (string) singo_tools_get_option( 'neshan_map_default_api_key', '' );
+		if ( empty( $api_key ) && ! empty( $settings['api_key'] ) ) {
+			$api_key = trim( (string) $settings['api_key'] );
 		}
 
 		$latitude     = ! empty( $settings['map_latitude'] ) ? trim( (string) $settings['map_latitude'] ) : '35.699789639952414';
@@ -289,17 +308,17 @@ class Singo_Neshan_Map_Widget extends Widget_Base {
 					<span class="dashicons dashicons-location-alt" style="font-size: 38px; width: 38px; height: 38px;"></span>
 				</div>
 				<div class="singo-neshan-map-placeholder-title">
-					<?php esc_html_e( 'کلید وب API نشان وارد نشده است', 'singo-tools' ); ?>
+					<?php esc_html_e( 'کلید وب API نشان تنظیم نشده است', 'singo-tools' ); ?>
 				</div>
 				<div class="singo-neshan-map-placeholder-desc">
-					<?php
-					printf(
-						/* translators: %s: Neshan Platform link */
-						esc_html__( 'لطفاً کلید وب API رایگان خود را از %s دریافت کرده و در تنظیمات ویجت یا در بخش سایر امکانات وارد نمایید.', 'singo-tools' ),
-						'<a href="https://platform.neshan.org/panel/api-key" target="_blank" rel="noopener noreferrer">' . esc_html__( 'پنل توسعه‌دهندگان نشان', 'singo-tools' ) . '</a>'
-					);
-					?>
+					<?php esc_html_e( 'جهت نمایش نقشه، لطفاً کلید وب API رایگان خود را در تنظیمات جعبه ابزار سینگو وارد نمایید.', 'singo-tools' ); ?>
 				</div>
+				<?php if ( current_user_can( 'manage_woocommerce' ) ) : ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=singo-tools' ) ); ?>" target="_blank" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; background: #ad6141; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 12.5px; font-weight: 700;">
+						<span class="dashicons dashicons-admin-generic" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+						<?php esc_html_e( 'ورود به تنظیمات افزونه', 'singo-tools' ); ?>
+					</a>
+				<?php endif; ?>
 			</div>
 			<?php
 			return;
@@ -401,9 +420,12 @@ class Singo_Neshan_Map_Widget extends Widget_Base {
 	}
 
 	protected function content_template(): void {
+		$global_api_key = (string) singo_tools_get_option( 'neshan_map_default_api_key', '' );
+		$settings_url   = admin_url( 'admin.php?page=singo-tools' );
 		?>
 		<#
-		var apiKey = settings.api_key ? settings.api_key.trim() : '';
+		var globalKey = '<?php echo esc_js( $global_api_key ); ?>';
+		var apiKey = globalKey ? globalKey.trim() : (settings.api_key ? settings.api_key.trim() : '');
 		if ( ! apiKey || apiKey === 'web.' ) {
 			#>
 			<div class="singo-neshan-map-placeholder">
@@ -411,11 +433,15 @@ class Singo_Neshan_Map_Widget extends Widget_Base {
 					<span class="dashicons dashicons-location-alt" style="font-size: 38px; width: 38px; height: 38px;"></span>
 				</div>
 				<div class="singo-neshan-map-placeholder-title">
-					<?php esc_html_e( 'کلید وب API نشان وارد نشده است', 'singo-tools' ); ?>
+					<?php esc_html_e( 'کلید وب API نشان تنظیم نشده است', 'singo-tools' ); ?>
 				</div>
 				<div class="singo-neshan-map-placeholder-desc">
-					<?php esc_html_e( 'لطفاً کلید وب API معتبر نشان را در پنل تنظیمات سمت راست وارد نمایید.', 'singo-tools' ); ?>
+					<?php esc_html_e( 'لطفاً کلید وب API نشان را در تنظیمات افزونه (جعبه ابزار سینگو) وارد نمایید.', 'singo-tools' ); ?>
 				</div>
+				<a href="<?php echo esc_url( $settings_url ); ?>" target="_blank" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; background: #ad6141; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 12.5px; font-weight: 700;">
+					<span class="dashicons dashicons-admin-generic" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+					<?php esc_html_e( 'رفتن به تنظیمات افزونه', 'singo-tools' ); ?>
+				</a>
 			</div>
 			<#
 		} else {

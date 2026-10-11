@@ -42,13 +42,15 @@ class Singo_Tools_Core {
 	private function includes(): void {
 		require_once SINGO_TOOLS_PATH . 'includes/helpers.php';
 
-		// Load Debugger strictly if enabled or in admin
-		if ( file_exists( SINGO_TOOLS_PATH . 'includes/class-singo-tools-debugger.php' ) ) {
-			require_once SINGO_TOOLS_PATH . 'includes/class-singo-tools-debugger.php';
-			if ( is_admin() || singo_tools_get_option( 'enable_system_debug', true ) ) {
-				Singo_Tools_Debugger::get_instance();
+		// Fallback autoloader for Singo_Tools_Debugger from self-contained debug module
+		spl_autoload_register( static function ( string $class ): void {
+			if ( 'Singo_Tools_Debugger' === $class ) {
+				$file = SINGO_TOOLS_PATH . 'modules/debug/classes/class-singo-tools-debugger.php';
+				if ( file_exists( $file ) ) {
+					require_once $file;
+				}
 			}
-		}
+		} );
 
 		// Load Modular Infrastructure
 		require_once SINGO_TOOLS_PATH . 'includes/Core/AbstractModule.php';

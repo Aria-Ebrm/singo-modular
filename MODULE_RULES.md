@@ -236,3 +236,91 @@ class SampleFeatureModule extends AbstractModule {
 	}
 }
 ```
+
+---
+
+## 🧰 ۸. استفاده از جعبه‌ابزار دارایی‌های مشترک (Singo Admin UI Toolkit)
+
+برای جلوگیری از تکرار کدهای CSS و اسکریپت‌های جاوااسکریپت در ماژول‌های مختلف، افزونه مجهز به یک **کتابخانه سراسری کامپوننت‌های رابط کاربری** در هسته اصلی است:
+* `assets/css/singo-admin-ui.css`
+* `assets/js/singo-admin-ui.js`
+
+این دارایی‌ها به صورت متمرکز در صفحات تنظیمات بارگذاری می‌شوند. هر ماژولی که نیاز به دکمه کپی، شورت‌کد، باکس راهنما یا بج وضعیت دارد، می‌تواند **بدون نوشتن حتی ۱ خط CSS یا JS اضافه**، مستقیماً از کلاس‌های زیر استفاده نماید:
+
+### ۱. دکمه کپی هوشمند یک‌کلیکه (One-Click Copy Widget)
+با قرار دادن صفت `data-copy` یا کلاس `.singo-copy-btn`، متن مورد نظر مستقیماً در حافظه کپی شده، آیکون به تیک سبز تغییر یافته و پیام توست شناور ظاهر می‌شود:
+
+```html
+<!-- کپی متن مستقیم از اتریبیوت -->
+<button type="button" class="singo-copy-btn" data-copy="[my_module_shortcode]" data-toast="شورت‌کد با موفقیت کپی شد!">
+    <span class="dashicons dashicons-clipboard"></span> کپی شورت‌کد
+</button>
+
+<!-- جعبه کد خطی با دکمه کپی تعبیه‌شده -->
+<div class="singo-copyable-code-box">
+    <code>[my_module_shortcode id="123"]</code>
+    <button type="button" class="singo-copy-btn" data-copy='[my_module_shortcode id="123"]'>
+        <span class="dashicons dashicons-clipboard"></span> کپی
+    </button>
+</div>
+```
+
+### ۲. نشان‌های وضعیت استاندارد (Status Badges)
+بج‌های بهینه‌سازی شده منطبق با رنگ‌های سازمان‌یافته Optionino:
+```html
+<span class="singo-badge singo-badge--primary">پیش‌فرض</span>
+<span class="singo-badge singo-badge--success">فعال ✓</span>
+<span class="singo-badge singo-badge--warning">نیاز به توجه</span>
+<span class="singo-badge singo-badge--danger">غیرفعال ✗</span>
+<span class="singo-badge singo-badge--info">اطلاعیه</span>
+<span class="singo-badge singo-badge--neutral">خنثی</span>
+```
+
+### ۳. کارت‌های آموزشی و راهنما (Educational Guide Cards)
+باکس‌های شکیل با بار شاخص Optionino برای راهنمای استفاده از ماژول‌ها:
+```html
+<div class="singo-guide-card">
+    <div class="singo-guide-title">
+        <span class="dashicons dashicons-welcome-learn-more"></span> راهنمای استفاده از این ماژول
+    </div>
+    <ul class="singo-guide-list">
+        <li class="singo-guide-item">
+            <span class="singo-guide-badge">۱</span>
+            <span class="singo-guide-text">سوئیچر ماژول را روشن نمایید.</span>
+        </li>
+        <li class="singo-guide-item">
+            <span class="singo-guide-badge">۲</span>
+            <span class="singo-guide-text">شورت‌کد را در صفحه یا برگه مورد نظر قرار دهید.</span>
+        </li>
+    </ul>
+</div>
+```
+
+### ۴. کارت‌ها و ظروف مدرن (Modern Container Cards)
+برای بخش‌های ویوی اختصاصی به جای ساختارهای قدیمی وردپرس:
+```html
+<div class="singo-card">
+    <div class="singo-card-header">
+        <h2 class="singo-card-title">
+            <span class="dashicons dashicons-admin-settings"></span> عنوان بخش
+        </h2>
+    </div>
+    <div class="singo-card-body">
+        محتوای ماژول...
+    </div>
+</div>
+```
+
+### ۵. دکمه‌های اکشن استاندارد (Action Buttons)
+```html
+<button type="button" class="singo-btn singo-btn--primary">ذخیره عملیات</button>
+<button type="button" class="singo-btn singo-btn--secondary">لغو یا بازگشت</button>
+<button type="button" class="singo-btn singo-btn--danger">حذف داده‌ها</button>
+```
+
+### ۶. توست‌های نوتیفیکیشن جاوااسکریپت (Floating Toasts)
+در اسکریپت‌های هر ماژول می‌توانید بدون هیچ کتابخانه جانبی توست شناور صادر کنید:
+```javascript
+window.SingoUI.toast('عملیات با موفقیت انجام شد!', 'success'); // 'success' | 'warning' | 'danger' | 'info'
+```
+

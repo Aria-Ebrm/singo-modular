@@ -53,7 +53,7 @@ class PriceListModule extends AbstractModule {
 		return array(
 			'id'    => 'price_list_pdf',
 			'title' => self::get_name(),
-			'desc'  => 'تولید و دانلود مستقیم لیست قیمت محصولات ووکامرس در قالب استاندارد PDF بر اساس دسته‌بندی با تاریخ روز شمسی و لوگو.',
+			'desc'  => 'تولید  قیمت محصولات ووکامرس بصورت PDF.',
 			'icon'  => self::get_icon(),
 			'file'  => $view,
 		);

@@ -22,55 +22,6 @@ class Singo_Tools_Optionino {
 		self::set_tabs();
 
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles' ) );
-		add_action( 'admin_menu', array( __CLASS__, 'register_debug_submenu' ), 20 );
-	}
-
-	/**
-	 * Register Debugger & Logs Submenu Page under Singo Tools main menu.
-	 */
-	public static function register_debug_submenu(): void {
-		add_submenu_page(
-			'singo-tools',
-			'دیباگ و لاگ‌های سیستم',
-			'دیباگ و لاگ‌ها',
-			singo_tools_get_admin_capability(),
-			'singo-tools-debug',
-			array( __CLASS__, 'render_debug_page' )
-		);
-	}
-
-	/**
-	 * Render Standalone Debugger & Logs Submenu Page.
-	 */
-	public static function render_debug_page(): void {
-		if ( ! singo_tools_current_user_can_manage() ) {
-			wp_die( 'سطح دسترسی ناکافی است.' );
-		}
-
-		if ( class_exists( 'OPTNNO' ) ) {
-			$optnno_instance = new OPTNNO();
-			$optnno_instance->admin_scripts();
-		}
-		?>
-		<div id="optionino" class="optionino-container" style="direction: rtl; margin-top: 20px; max-width: 1200px;">
-			<form id="save-options-optionino" method="post" action="">
-				<input type="hidden" name="dev_name" value="singo_tools_options">
-				<input type="hidden" name="security" value="<?php echo wp_create_nonce( 'optionino_nonce' ); ?>">
-				<?php
-				if ( file_exists( SINGO_TOOLS_PATH . 'modules/debug/views/admin-debug-view.php' ) ) {
-					require SINGO_TOOLS_PATH . 'modules/debug/views/admin-debug-view.php';
-				}
-				?>
-				<div class="optionino-options-save-box" style="margin-top: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; padding-bottom: 20px;">
-					<button type="submit" class="button submit-optionino" style="background-color: #ad6141; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-						ذخیره وضعیت سرویس عیب‌یابی
-					</button>
-					<span class="error-text" style="display:none; color: red;"></span>
-					<span class="success-text" style="display:none; color: green;"></span>
-				</div>
-			</form>
-		</div>
-		<?php
 	}
 
 	/**
@@ -155,8 +106,14 @@ class Singo_Tools_Optionino {
 		wp_add_inline_style( 'singo-tools-admin-style', $global_css );
 
 		// 2. Optionino Settings Page Styling & Color Swatch Initialization
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || ( $screen->id !== 'toplevel_page_singo-tools' && $screen->id !== 'singo-tools_page_singo-tools-debug' && $screen->id !== 'toplevel_page_shamsi-date-master' ) ) {
+		$is_singo_page = false;
+		if ( isset( $_GET['page'] ) && ( str_starts_with( (string) $_GET['page'], 'singo' ) || str_contains( (string) $_GET['page'], 'singo' ) ) ) {
+			$is_singo_page = true;
+		} elseif ( $screen && ( str_contains( (string) $screen->id, 'singo' ) || str_contains( (string) $screen->id, 'optionino' ) || str_contains( (string) $screen->id, 'سینگو' ) ) ) {
+			$is_singo_page = true;
+		}
+
+		if ( ! $is_singo_page ) {
 			return;
 		}
 
@@ -171,6 +128,21 @@ class Singo_Tools_Optionino {
 			SINGO_TOOLS_URL . 'assets/js/singo-delta-save.js',
 			array( 'jquery' ),
 			$delta_ver,
+			true
+		);
+
+		// Global Singo Admin UI Toolkit (Optionino Harmonized Styles & Interactive Helpers)
+		wp_enqueue_style(
+			'singo-admin-ui-toolkit',
+			SINGO_TOOLS_URL . 'assets/css/singo-admin-ui.css',
+			array(),
+			SINGO_TOOLS_VERSION
+		);
+		wp_enqueue_script(
+			'singo-admin-ui-toolkit',
+			SINGO_TOOLS_URL . 'assets/js/singo-admin-ui.js',
+			array( 'jquery' ),
+			SINGO_TOOLS_VERSION,
 			true
 		);
 

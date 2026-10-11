@@ -105,7 +105,10 @@ class Singo_Price_List {
 		$hide_strike      = isset( $_POST['hide_strike'] ) && ( '1' === (string) $_POST['hide_strike'] || 'true' === (string) $_POST['hide_strike'] );
 		$expand_vars      = ! isset( $_POST['expand_variations'] ) || '1' === (string) $_POST['expand_variations'] || 'true' === (string) $_POST['expand_variations'];
 
-		$products = $this->get_products_data( $category_id, $in_stock, $orderby, $order, $discount_percent, $hide_strike, $expand_vars );
+		$products = $this->get_products_data( $category_id, $in_stock, $orderby, $order, $discount_percent, $hide_strike, $expand_vars, 30 );
+		if ( count( $products ) > 30 ) {
+			$products = array_slice( $products, 0, 30 );
+		}
 
 		ob_start();
 		if ( empty( $products ) ) {
@@ -118,7 +121,7 @@ class Singo_Price_List {
 					<td style="text-align: center; font-weight: bold; color: #64748b; padding: 10px 8px;"><?php echo esc_html( $row_num ); ?></td>
 					<td style="text-align: center; padding: 6px;">
 						<?php if ( ! empty( $prod['thumb_url'] ) ) : ?>
-							<img src="<?php echo esc_url( $prod['thumb_url'] ); ?>" alt="<?php echo esc_attr( $prod['title'] ); ?>" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; vertical-align: middle;" />
+							<img src="<?php echo esc_url( $prod['thumb_url'] ); ?>" alt="<?php echo esc_attr( $prod['title'] ); ?>" loading="lazy" decoding="async" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; vertical-align: middle;" />
 						<?php else : ?>
 							<span style="font-size: 11px; color: #94a3b8;">بدون تصویر</span>
 						<?php endif; ?>
@@ -141,6 +144,7 @@ class Singo_Price_List {
 		wp_send_json_success( array(
 			'count'      => count( $products ),
 			'count_fa'   => class_exists( 'Singo_Shamsi_Converter' ) ? Singo_Shamsi_Converter::convert_to_persian_digits( (string) count( $products ) ) : (string) count( $products ),
+			'is_capped'  => count( $products ) >= 30,
 			'table_html' => $html,
 		) );
 	}
@@ -292,6 +296,7 @@ class Singo_Price_List {
 	 * @param float  $discount_percent Global discount percentage (0 to 100).
 	 * @param bool   $hide_strike      Whether to hide strikethrough original price.
 	 * @param bool   $expand_variations Whether to expand variable products into separate rows.
+	 * @param int    $limit             Maximum number of products to query.
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_products_data(
@@ -301,21 +306,22 @@ class Singo_Price_List {
 		string $order = 'ASC',
 		float $discount_percent = 0.0,
 		bool $hide_strike = false,
-		bool $expand_variations = true
+		bool $expand_variations = true,
+		int $limit = 500
 	): array {
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			return array();
 		}
 
 		// Fast return from in-memory request cache if query was already processed
-		$cache_key = md5( $category_id . '_' . ( $in_stock ? '1' : '0' ) . '_' . $orderby . '_' . $order . '_' . $discount_percent . '_' . ( $hide_strike ? '1' : '0' ) . '_' . ( $expand_variations ? '1' : '0' ) );
+		$cache_key = md5( $category_id . '_' . ( $in_stock ? '1' : '0' ) . '_' . $orderby . '_' . $order . '_' . $discount_percent . '_' . ( $hide_strike ? '1' : '0' ) . '_' . ( $expand_variations ? '1' : '0' ) . '_' . $limit );
 		if ( isset( self::$products_cache[ $cache_key ] ) ) {
 			return self::$products_cache[ $cache_key ];
 		}
 
 		$query_args = array(
 			'status'        => 'publish',
-			'limit'         => 500, // Safe ceiling for price lists
+			'limit'         => $limit,
 			'paginate'      => false,
 			'no_found_rows' => true, // Lightweight: Bypasses SQL_CALC_FOUND_ROWS in database
 		);

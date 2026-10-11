@@ -342,7 +342,7 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 		<!-- Field 8: Brand / Primary Color Picker -->
 		<div style="margin-top: 18px; border-top: 1px dashed #e2e8f0; padding-top: 18px;">
 			<label for="singo-price-primary-color" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 13.5px; color: #334155;">
-				رنگ سازمانی و اصلی قالب PDF (جایگزین رنگ پیش‌فرض #ad6141):
+				رنگ سازمانی و اصلی قالب PDF:
 			</label>
 			<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
 				<input type="text" class="optionino-color-selector" id="singo-price-primary-color" name="singo-price-primary-color" value="<?php echo esc_attr( $saved_primary_color ); ?>" placeholder="#ad6141" pattern="^#?[0-9A-Fa-f]{3,8}$" data-default-color="#ad6141" style="height: 38px; width: 110px; font-family: monospace; font-size: 13px; text-align: left; direction: ltr;" />
@@ -350,10 +350,6 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 				<button type="button" id="singo-btn-save-color" class="singo-btn-primary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" title="ذخیره رنگ سازمانی در دیتابیس">
 					<span class="dashicons dashicons-saved" style="font-size: 16px; width: 16px; height: 16px; color: #ffffff !important; fill: #ffffff !important;"></span>
 					ذخیره رنگ
-				</button>
-
-				<button type="button" id="singo-btn-reset-color" class="singo-btn-secondary" data-default="#ad6141" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 12px; border-radius: 6px; white-space: nowrap;" title="بازنشانی به رنگ سازمانی پیش‌فرض سینگو (#ad6141)">
-					پیش‌فرض (#ad6141)
 				</button>
 
 				<span id="singo-color-status" style="font-size: 12.5px; font-weight: 600; display: none;"></span>
@@ -375,7 +371,12 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 				مشاهده برگه کامل در تب جدید
 			</button>
 
-			<button type="button" id="singo-btn-refresh-preview" class="singo-btn-secondary" style="height: 38px; padding: 0 14px; font-size: 13px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; margin-right: auto;">
+			<button type="button" id="singo-btn-load-preview" class="singo-btn-primary" style="height: 38px; padding: 0 16px; font-size: 13px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; margin-right: auto;">
+				<span class="dashicons dashicons-visibility" style="font-size: 16px; width: 16px; height: 16px; color: #ffffff !important;"></span>
+				مشاهده پیش‌نمایش جدول (۳۰ محصول)
+			</button>
+
+			<button type="button" id="singo-btn-refresh-preview" class="singo-btn-secondary" style="height: 38px; padding: 0 14px; font-size: 13px; font-weight: 600; border-radius: 6px; display: none; align-items: center; gap: 6px;">
 				<span class="dashicons dashicons-update" style="font-size: 16px; width: 16px; height: 16px; color: #ad6141 !important;"></span>
 				بروزرسانی پیش‌نمایش جدول
 			</button>
@@ -390,10 +391,10 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 			<div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14.5px; color: #1e293b;">
 				<span class="dashicons dashicons-visibility" style="color: #ad6141;"></span>
 				<span>پیش‌نمایش زنده جدول محصولات</span>
-				<span style="font-size: 12px; color: #64748b; font-weight: normal;">(قیمت‌ها به تومان)</span>
+				<span style="font-size: 12px; color: #64748b; font-weight: normal;">(قیمت‌ها به تومان - حداکثر ۳۰ قلم برای سرعت بالا)</span>
 			</div>
 			<div style="font-size: 13px; font-weight: 700; color: #ad6141; background: #fff; border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 20px;">
-				تعداد محصولات: <span id="singo-preview-count">در حال شمارش...</span>
+				تعداد محصولات: <span id="singo-preview-count">در انتظار مشاهده</span>
 			</div>
 		</div>
 
@@ -415,8 +416,16 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 				</thead>
 				<tbody id="singo-preview-tbody">
 					<tr>
-						<td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
-							در حال بارگذاری لیست محصولات...
+						<td colspan="4" style="text-align: center; padding: 45px 20px; color: #64748b; background: #fafbfc;">
+							<div style="max-width: 440px; margin: 0 auto;">
+								<span class="dashicons dashicons-visibility" style="font-size: 32px; width: 32px; height: 32px; color: #ad6141; display: block; margin: 0 auto 10px;"></span>
+								<strong style="font-size: 14px; color: #334155; display: block; margin-bottom: 6px;">پیش‌نمایش جدول هنوز بارگذاری نشده است</strong>
+								<p style="font-size: 12.5px; color: #64748b; margin: 0 0 14px 0; line-height: 1.6;">جهت افزایش چشمگیر سرعت لود صفحه و جلوگیری از دانلود همزمان صدها تصویر، پیش‌نمایش جدول به صورت خودکار لود نمی‌شود.</p>
+								<button type="button" class="singo-btn-primary singo-btn-trigger-load-preview" style="height: 36px; padding: 0 18px; font-size: 12.5px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+									<span class="dashicons dashicons-visibility"></span>
+									مشاهده پیش‌نمایش جدول (۳۰ محصول اول)
+								</button>
+							</div>
 						</td>
 					</tr>
 				</tbody>
@@ -693,19 +702,6 @@ jQuery(document).ready(function($) {
 		applyPreviewPriceColor(color);
 	});
 
-	// Reset Primary Color Button
-	$('#singo-btn-reset-color').on('click', function(e) {
-		e.preventDefault();
-		var defaultColor = '#ad6141';
-		if ($.fn.wpColorPicker && $('#singo-price-primary-color').data('wpWpColorPicker')) {
-			$('#singo-price-primary-color').wpColorPicker('color', defaultColor);
-		} else {
-			$('#singo-price-primary-color').val(defaultColor).trigger('change');
-		}
-		savePrimaryColorSetting(defaultColor);
-		applyPreviewPriceColor(defaultColor);
-	});
-
 	// Dynamic live color update on input/change
 	$('#singo-price-primary-color').on('input change', function() {
 		var val = $(this).val().trim();
@@ -714,20 +710,26 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	// AJAX Load Preview Table with In-Flight Request Cancellation
+	// Flag to track whether preview was requested by user
+	var isPreviewLoaded = false;
 	var previewXhr = null;
 
+	// AJAX Load Preview Table with In-Flight Request Cancellation & 30-item limit
 	function loadPreviewTable() {
 		var $tbody = $('#singo-preview-tbody');
 		var $count = $('#singo-preview-count');
+		var $loadBtn = $('#singo-btn-load-preview');
+		var $refreshBtn = $('#singo-btn-refresh-preview');
 
 		// Abort previous in-flight request to eliminate race conditions and reduce server load
 		if (previewXhr && previewXhr.readyState !== 4) {
 			previewXhr.abort();
 		}
 
-		$tbody.html('<tr><td colspan="4" style="text-align:center; padding:30px; color:#64748b;">در حال دریافت اطلاعات محصولات...</td></tr>');
-		$count.text('...');
+		$tbody.html('<tr><td colspan="4" style="text-align:center; padding:35px; color:#64748b;"><span class="dashicons dashicons-update" style="animation: rotation 1.5s infinite linear; font-size:20px; width:20px; height:20px; display:inline-block; vertical-align:middle; margin-left:6px;"></span> در حال بارگذاری پیش‌نمایش (حداکثر ۳۰ قلم)...</td></tr>');
+		$count.text('در حال دریافت...');
+		$refreshBtn.prop('disabled', true);
+		$loadBtn.prop('disabled', true);
 
 		previewXhr = $.ajax({
 			url: ajaxUrl,
@@ -743,9 +745,18 @@ jQuery(document).ready(function($) {
 				expand_variations: $('#singo-price-expand-variations').is(':checked') ? 1 : 0
 			},
 			success: function(res) {
+				$refreshBtn.prop('disabled', false);
+				$loadBtn.prop('disabled', false);
+
 				if (res.success && res.data) {
+					isPreviewLoaded = true;
 					$tbody.html(res.data.table_html);
-					$count.text(res.data.count_fa + ' کالا');
+					var countLabel = res.data.is_capped ? (res.data.count_fa + ' کالا (نمونه ۳۰تایی)') : (res.data.count_fa + ' کالا');
+					$count.text(countLabel);
+
+					$refreshBtn.css('display', 'inline-flex');
+					$loadBtn.html('<span class="dashicons dashicons-yes"></span> پیش‌نمایش فعال شد').removeClass('singo-btn-primary').addClass('singo-btn-secondary');
+
 					var currentColor = $('#singo-price-primary-color').val().trim() || '#ad6141';
 					applyPreviewPriceColor(currentColor);
 				} else {
@@ -754,8 +765,11 @@ jQuery(document).ready(function($) {
 				}
 			},
 			error: function(xhr, status) {
+				$refreshBtn.prop('disabled', false);
+				$loadBtn.prop('disabled', false);
+
 				if (status === 'abort') {
-					return; // Intentionally aborted, ignore
+					return;
 				}
 				$tbody.html('<tr><td colspan="4" style="text-align:center; padding:30px; color:#ef4444;">خطا در برقراری ارتباط با سرور.</td></tr>');
 				$count.text('۰ کالا');
@@ -763,10 +777,18 @@ jQuery(document).ready(function($) {
 		});
 	}
 
-	// Initial load and filter change events
-	loadPreviewTable();
-	$('#singo-price-category, #singo-price-orderby, #singo-price-instock, #singo-price-discount-percent, #singo-price-hide-strike, #singo-price-expand-variations').on('change input', loadPreviewTable);
-	$('#singo-btn-refresh-preview').on('click', loadPreviewTable);
+	// Trigger preview exclusively on explicit user click
+	$(document).on('click', '#singo-btn-load-preview, .singo-btn-trigger-load-preview, #singo-btn-refresh-preview', function(e) {
+		e.preventDefault();
+		loadPreviewTable();
+	});
+
+	// Only re-fetch if preview has already been loaded by the user
+	$('#singo-price-category, #singo-price-orderby, #singo-price-instock, #singo-price-discount-percent, #singo-price-hide-strike, #singo-price-expand-variations').on('change input', function() {
+		if (isPreviewLoaded) {
+			loadPreviewTable();
+		}
+	});
 
 	// Synchronize Optionino Global Save Changes Button (Hide exclusively on Price List PDF tab)
 	function syncSaveButtonVisibility() {
