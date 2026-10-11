@@ -76,21 +76,82 @@ class DisableRightClickModule extends AbstractModule {
 	}
 
 	/**
-	 * Output inline style and script to disable text selection and context menu.
+	 * Output inline style and script to disable text selection and context menu for visitors,
+	 * while completely exempting administrators and store managers.
 	 */
 	public function render_script_and_styles(): void {
+		// Completely exempt administrators and store managers
+		if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'administrator' ) ) {
+			return;
+		}
+
+		// Exempt customizer preview and page builders
+		if ( is_customize_preview() ) {
+			return;
+		}
+
+		if ( class_exists( '\Elementor\Plugin' ) ) {
+			if ( \Elementor\Plugin::$instance->editor->is_edit_mode() || \Elementor\Plugin::$instance->preview->is_preview_mode() ) {
+				return;
+			}
+		}
 		?>
-		<style>
+		<style id="singo-disable-right-click-styles">
 			body, html {
 				-webkit-user-select: none !important;
+				-moz-user-select: none !important;
 				-ms-user-select: none !important;
 				user-select: none !important;
 			}
+			input, textarea, select, [contenteditable="true"] {
+				-webkit-user-select: auto !important;
+				-moz-user-select: auto !important;
+				-ms-user-select: auto !important;
+				user-select: auto !important;
+			}
 		</style>
-		<script>
-			document.addEventListener('contextmenu', function(e) {
-				e.preventDefault();
-			});
+		<script id="singo-disable-right-click-script">
+			(function() {
+				// Prevent right click (context menu)
+				document.addEventListener('contextmenu', function(e) {
+					e.preventDefault();
+					return false;
+				}, false);
+
+				// Prevent image drag & drop
+				document.addEventListener('dragstart', function(e) {
+					if (e.target && e.target.nodeName === 'IMG') {
+						e.preventDefault();
+						return false;
+					}
+				}, false);
+
+				// Prevent copy hotkeys (Ctrl+C, Ctrl+U, Ctrl+S, F12)
+				document.addEventListener('keydown', function(e) {
+					var key = e.key || '';
+					var keyCode = e.keyCode || e.which;
+
+					// F12 DevTools
+					if (keyCode === 123 || key === 'F12') {
+						e.preventDefault();
+						return false;
+					}
+
+					// Ctrl / Cmd combinations
+					if (e.ctrlKey || e.metaKey) {
+						var lowerKey = key.toLowerCase();
+						// Ctrl+C, Ctrl+U, Ctrl+S, Ctrl+Shift+I, Ctrl+Shift+J
+						if (lowerKey === 'c' || lowerKey === 'u' || lowerKey === 's' || (e.shiftKey && (lowerKey === 'i' || lowerKey === 'j'))) {
+							var activeEl = document.activeElement;
+							if (lowerKey === 'c' && activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+								return true;
+							}
+							e.preventDefault();
+							return false;
+						}
+					}
+				}, false);
+			})();
 		</script>
 		<?php
 	}
