@@ -67,7 +67,7 @@ class Singo_Shamsi_Core {
 		}
 
 		// Load Elementor Module
-		if ( did_action( 'elementor/loaded' ) && singo_tools_get_option( 'enable_elementor', true ) ) {
+		if ( ( did_action( 'elementor/loaded' ) || class_exists( '\Elementor\Plugin' ) ) && singo_tools_get_option( 'enable_elementor', true ) ) {
 			require_once __DIR__ . '/class-singo-shamsi-elementor.php';
 			new Singo_Shamsi_Elementor();
 		}

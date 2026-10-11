@@ -144,6 +144,17 @@ class ShamsiDateModule extends AbstractModule {
 					array( 'master_switch', '==', true ),
 				),
 			);
+			$shamsi_fields[] = array(
+				'id'      => 'enable_elementor_form_date',
+				'type'    => 'switcher',
+				'title'   => 'فیلد تاریخ شمسی در فرم‌های المنتور (Datepicker)',
+				'desc'    => 'افزودن فیلد تقویم شمسی به ابزارک فرم المنتور پرو همراه با پنجره بازشو جهت انتخاب تاریخ توسط کاربران.',
+				'default' => true,
+				'require' => array(
+					array( 'master_switch', '==', true ),
+					array( 'enable_elementor', '==', true ),
+				),
+			);
 		}
 
 		return array(
