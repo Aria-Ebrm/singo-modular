@@ -43,27 +43,57 @@
 
 ---
 
-## 🌟 Key Architectural Features
+## 🌟 Core Architecture & Framework Features
 
-- ⚡ **Zero Disk Scanning at Runtime:** All modules are cached in the database via `ManifestManager`. Zero filesystem scanning (`glob` or `scandir`) occurs during standard page loads.
-- 🎨 **100% Native Optionino Integration:** Seamlessly injects module tabs and setting fields into the [Optionino Framework](https://github.com/shokrino/optionino-framework) by [Matin Shokri](https://github.com/shokrino) dynamically without modifying a single line of core `optionino/` code.
-- 🧱 **Dual Module Placement Strategy:**
-  - **Dedicated Tab (`dedicated_tab`):** For expansive, multi-feature modules with custom order and icons.
-  - **Other Tools Tab (`other_tools`):** For compact, single-purpose utilities to prevent admin menu clutter.
-- 💾 **Intelligent Delta Saving:** When saving admin options, only modified keys are written to the database, preventing heavy I/O overhead and redundant SQL queries.
-- 🛡️ **Default-Inactive Rule:** All new features and modules are disabled by default (`false`) upon installation, giving administrators complete control.
-- 🐘 **Modern PHP 8+ Standards:** Full compliance with `declare(strict_types=1);`, explicit type hinting, and strict WordPress security best practices.
+### 1. ⚡ Zero Disk Scanning Runtime Policy (`ManifestManager`)
+- **Zero Runtime Filesystem Overhead:** Normal WordPress page requests (both frontend and dashboard) never run `glob()`, `scandir()`, or filesystem directory scans.
+- **Persistent Database Cache:** All discovered modules, class namespaces, paths, and placement configurations are compiled once into the `singo_modular_modules_manifest` database option.
+- **Deterministic Cache Invalidation:** The manifest cache is rebuilt strictly during lifecycle events: plugin activation (`register_activation_hook`), plugin update (`upgrader_process_complete`), or explicit settings saves.
+
+### 2. 💾 Intelligent Delta Saving & Dirty Checking Engine (`DeltaManager`)
+- **Client-Side Dirty Checking (`assets/js/singo-delta-save.js`):** Takes an initial snapshot of the settings form upon load. Monitors all inputs, switchers, and nested Optionino repeaters, isolating only the keys modified by the user (`dirtyFields`).
+- **Sub-Millisecond Payload:** Transmits only the modified keys via AJAX instead of submitting the full, bloated settings form.
+- **Server-Side Differential Merge (`includes/Core/DeltaManager.php`):** Compares inbound deltas against stored options via `pre_update_option`, eliminating redundant SQL `UPDATE` queries and preventing database write overhead.
+
+### 3. 🎨 Native Optionino Integration & Dynamic Injection
+- **100% Core Immutability:** Seamlessly injects module settings into the [Optionino Framework](https://github.com/shokrino/optionino-framework) by [Matin Shokri](https://github.com/shokrino) without altering a single line of core `optionino/` code.
+- **Branded Admin UI:** Features customized admin styling, brand color theming, dynamic SVG logo integration, and inherited dashboard typography (`font-family: inherit !important;`).
+
+### 4. 🧱 Dual Placement Strategy
+- **Dedicated Tab (`dedicated_tab`):** For expansive modules requiring an independent navigation tab, custom Dashicon/SVG, and specific ordering priority (`get_order()`).
+- **Other Tools Tab (`other_tools`):** Automatically consolidates compact, single-purpose utilities into a clean, shared "Other Tools" tab positioned at the end (`PHP_INT_MAX`), eliminating admin menu clutter.
+
+### 5. 🛡️ Default-Inactive Principle
+- **Safe Activation:** Every single feature, module switcher, and control defaults to `false` upon installation.
+- **Zero Unexpected Side Effects:** Guarantees zero unintentional layout shifts, visual modifications, or database writes until explicitly turned on by administrators.
+
+### 6. 🚀 Static In-Memory Option Caching (`helpers.php`)
+- **Static Request Cache:** `singo_modular_get_option()` caches retrieved settings in static memory, bypassing repetitive `get_option()` queries during complex page rendering cycles.
+- **Instant Cache Flush:** Automatically flushes the runtime cache whenever options are updated (`update_option_singo_modular_options`).
 
 ---
 
-## 📦 Bundled Sample Modules
+## 📦 Bundled Production Modules & Capabilities
 
-This repository includes two production-grade sample modules illustrating both placement paradigms:
+### 📅 1. Solar Hijri (Shamsi / Persian) Date Module (`modules/shamsi-date/`)
+*Comprehensive Persian calendar engine converting Gregorian dates across the WordPress ecosystem.*
+- **WordPress Core Integration:** Translates dates in posts, comments, archives, admin post list columns, and dashboard widgets.
+- **WooCommerce Support:** Persian date conversion for order management tables, order detail views, customer notes, transactional emails, and invoices.
+- **Elementor & Elementor Pro Compatibility:** Native date conversion for the Posts Widget, Archive Posts, Loop Builder, and Dynamic Tags.
+- **Elementor v4 Atomic Widgets (Twig Support):** Includes native Twig template (`persian-date-picker.html.twig`) engineered for next-generation Elementor v4 atomic controls.
+- **Persian Numeral Localization:** Converts standard Latin numerals (0-9) to Persian digits (۰-۹) across dates and numeric strings.
+- **Standalone Persian Datepicker:** Lightweight vanilla JS datepicker (`singo-persian-calendar.js` & `singo-datepicker-init.js`) integrated into admin screens and frontend Elementor forms.
+- **Granular Controls:** Dedicated admin tab allowing administrators to toggle each integration (Core, WooCommerce, Elementor, Digits, Datepicker) independently.
 
-| Module | Location | Placement Strategy | Description |
-| :--- | :--- | :--- | :--- |
-| **Solar Hijri (Shamsi) Date** | `modules/shamsi-date/` | Dedicated Tab (`dedicated_tab`) | Complete Persian/Solar Hijri date conversion for WordPress core, WooCommerce, and Elementor with Persian numerals and datepickers. |
-| **Estimated Reading Time** | `modules/reading-time/` | Other Tools Tab (`other_tools`) | Accurate reading time calculation for posts with two-layer caching, Persian word counting, and `[reading_time]` shortcode support. |
+### ⏱️ 2. Estimated Reading Time Module (`modules/reading-time/`)
+*Smart reading time estimator calibrated specifically for Persian content and typography.*
+- **Persian Text Tokenizer:** Accurately counts Persian words, numbers, and respects zero-width non-joiners (نیم‌فاصله - ZWNJ).
+- **Two-Tier Caching Architecture:**
+  - *Tier 1 (Memory):* Static in-memory cache for repeated lookups within the same request.
+  - *Tier 2 (Post Meta / Transients):* Stores calculated reading times to avoid repeated string parsing on every visit.
+- **Customizable WPM Speed:** Configurable words-per-minute rate to match content density (default: 200 WPM).
+- **Flexible Shortcode:** `[reading_time]` shortcode supporting customizable `before` text, `after` text, and post `id` parameters.
+- **Clean Placement:** Resides automatically inside the shared "Other Tools" tab.
 
 ---
 
