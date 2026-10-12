@@ -144,7 +144,7 @@ class CopyProtectModule extends AbstractModule {
 ## 🏗️ Project Directory Structure
 
 ```
-singo-modular-plugin/
+singo-modular/
 ├── singo-modular.php                   # Plugin bootstrap and entry file
 ├── README.md                           # Project documentation
 ├── MODULE_RULES.md                     # Technical architecture & developer standards

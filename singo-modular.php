@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 /*
-Plugin Name: افزونه ماژولار سینگو (Singo Modular)
+Plugin Name: Singo Modular
 Plugin URI: https://singo.studio
-Description: چارچوب ماژولار خودکفا و توسعه‌پذیر سینگو برای وردپرس با معماری مستقل ماژول‌ها و یکپارچه‌سازی کامل Optionino.
+Description: A modern, high-performance modular WordPress plugin framework built on Optionino with Zero Disk Scanning architecture.
 Version: 1.0.0
 Requires at least: 6.7
 Requires PHP: 8.0
