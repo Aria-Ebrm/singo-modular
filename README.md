@@ -1,14 +1,43 @@
----
-███████╗██╗███╗   ██╗ ██████╗  ██████╗     ███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗██╗      █████╗ ██████╗     
-██╔════╝██║████╗  ██║██╔════╝ ██╔═══██╗    ████╗ ████║██╔═══██╗██╔══██╗██║   ██║██║     ██╔══██╗██╔══██╗    
-███████╗██║██╔██╗ ██║██║  ███╗██║   ██║    ██╔████╔██║██║   ██║██║  ██║██║   ██║██║     ███████║██████╔╝    
-╚════██║██║██║╚██╗██║██║   ██║██║   ██║    ██║╚██╔╝██║██║   ██║██║  ██║██║   ██║██║     ██╔══██║██╔══██╗    
-███████║██║██║ ╚████║╚██████╔╝╚██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██████╔╝╚██████╔╝███████╗██║  ██║██║  ██║    
-╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝                                                                                                         
----
+<div align="center">
 
-# 🧩 Singo Modular WordPress Plugin Framework
-### Reference Architecture & Standard Boilerplate for Modular WordPress Development Powered by Optionino
+```text
+███████╗██╗███╗   ██╗ ██████╗  ██████╗     ███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗██╗      █████╗ ██████╗ 
+██╔════╝██║████╗  ██║██╔════╝ ██╔═══██╗    ████╗ ████║██╔═══██╗██╔══██╗██║   ██║██║     ██╔══██╗██╔══██╗
+███████╗██║██╔██╗ ██║██║  ███╗██║   ██║    ██╔████╔██║██║   ██║██║  ██║██║   ██║██║     ███████║██████╔╝
+╚════██║██║██║╚██╗██║██║   ██║██║   ██║    ██║╚██╔╝██║██║   ██║██║  ██║██║   ██║██║     ██╔══██║██╔══██╗
+███████║██║██║ ╚████║╚██████╔╝╚██████╔╝    ██║ ╚═╝ ██║╚██████╔╝██████╔╝╚██████╔╝███████╗██║  ██║██║  ██║
+╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝     ╚═╝     ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝
+```
+
+# Singo Modular
+
+**High-Performance Modular WordPress Plugin Architecture & Boilerplate Powered by Optionino**  
+*بویلرپلیت و فریم‌ورک استاندارد توسعه ماژولار برای وردپرس بر پایه Optionino*
+
+<p align="center">
+  <a href="https://github.com/Aria-Ebrm/singo-modular/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download-ZIP%20Plugin-2563EB?style=for-the-badge&logo=github&logoColor=white" alt="Download ZIP"></a>
+  <a href="MODULE_RULES.md"><img src="https://img.shields.io/badge/Standards-MODULE__RULES.md-059669?style=for-the-badge&logo=markdown&logoColor=white" alt="Standards"></a>
+  <a href="#-quick-start-how-to-build-a-new-module"><img src="https://img.shields.io/badge/Guide-Quick%20Start-D97706?style=for-the-badge&logo=bookstack&logoColor=white" alt="Quick Start"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Aria-Ebrm/singo-modular"><img src="https://img.shields.io/badge/Release-v1.0.0-2563EB?style=flat&logo=github" alt="Release"></a>
+  <a href="https://wordpress.org"><img src="https://img.shields.io/badge/WordPress-6.7%2B-21759B?style=flat&logo=wordpress&logoColor=white" alt="WordPress"></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=flat&logo=php&logoColor=white" alt="PHP"></a>
+  <a href="https://github.com/shokrino/optionino-framework"><img src="https://img.shields.io/badge/Framework-Optionino-0284C7?style=flat" alt="Optionino Framework"></a>
+  <a href="https://www.gnu.org/licenses/gpl-2.0.html"><img src="https://img.shields.io/badge/License-GPL%20v2%2B-F59E0B?style=flat" alt="License"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Architecture-Modular%20Self--Contained-10B981?style=flat" alt="Architecture">
+  <img src="https://img.shields.io/badge/Disk%20I%2FO-Zero%20Runtime%20Scan-059669?style=flat" alt="Zero Runtime Scan">
+  <img src="https://img.shields.io/badge/Storage-Intelligent%20Delta-7C3AED?style=flat" alt="Delta Storage">
+  <img src="https://img.shields.io/badge/Type%20Safety-PHP%208%20Strict-3B82F6?style=flat" alt="Strict Types">
+  <img src="https://img.shields.io/badge/Default-Inactive%20Safe-6B7280?style=flat" alt="Default Inactive">
+  <a href="https://github.com/Aria-Ebrm/singo-modular/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-22C55E?style=flat&logo=git&logoColor=white" alt="PRs Welcome"></a>
+</p>
+
+</div>
 
 **Singo Modular** is a modern, self-contained, lightning-fast architecture for developing WordPress features and plugins. Designed as a **Reference Implementation**, it enables developers to build and plug-in new features seamlessly without ever touching core plugin files or altering settings panel configurations.
 
