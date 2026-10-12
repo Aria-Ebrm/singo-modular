@@ -9,7 +9,6 @@ Version: 1.0.0
 Requires at least: 6.7
 Requires PHP: 8.0
 Author: Singo Studio
-Author URI: https://singo.studio
 Text Domain: singo-modular
 Domain Path: /languages
 License: GPLv2 or later
