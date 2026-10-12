@@ -8,7 +8,7 @@
 ## 🌟 Key Architectural Features
 
 - ⚡ **Zero Disk Scanning at Runtime:** All modules are cached in the database via `ManifestManager`. Zero filesystem scanning (`glob` or `scandir`) occurs during standard page loads.
-- 🎨 **100% Native Optionino Integration:** Seamlessly injects module tabs and setting fields into the Optionino panel dynamically without modifying a single line of core `optionino/` code.
+- 🎨 **100% Native Optionino Integration:** Seamlessly injects module tabs and setting fields into the [Optionino Framework](https://github.com/shokrino/optionino-framework) by [Matin Shokri](https://github.com/shokrino) dynamically without modifying a single line of core `optionino/` code.
 - 🧱 **Dual Module Placement Strategy:**
   - **Dedicated Tab (`dedicated_tab`):** For expansive, multi-feature modules with custom order and icons.
   - **Other Tools Tab (`other_tools`):** For compact, single-purpose utilities to prevent admin menu clutter.
@@ -175,7 +175,13 @@ singo-modular/
 
 ---
 
+## 👏 Credits & Acknowledgements
+
+- **Optionino Framework:** Powered by the lightweight, developer-friendly WordPress settings framework created by **[Matin Shokri](https://github.com/shokrino)** ([shokrino/optionino-framework](https://github.com/shokrino/optionino-framework)).
+- **Architecture & Boilerplate:** Designed and maintained by **[Singo Studio](https://singo.studio)**.
+
+---
+
 ## 📄 License
 
-This project is licensed under the [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html).  
-Developed by **Singo Studio**.
+This project is licensed under the [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
