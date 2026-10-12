@@ -182,6 +182,19 @@ singo-modular/
 
 ---
 
+## 🤝 Contributing & Submitting Modules
+
+We welcome community contributions! If you have built a useful, high-performance module that follows our [Module Development Guidelines](MODULE_RULES.md):
+
+1. **Fork** this repository and create your feature branch.
+2. Place your self-contained module inside `modules/your-module-name/`.
+3. Ensure it strictly adheres to the **Default-Inactive** rule, **Zero Disk Scanning** policy, and PHP 8+ strict typing.
+4. Submit a **Pull Request (PR)** with a concise overview of what your module does.
+
+Every contribution will be reviewed, and upon meeting the architecture standards, we will gladly merge and feature it publicly in the official repository!
+
+---
+
 ## 📄 License
 
 This project is licensed under the [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
