@@ -1,0 +1,226 @@
+<?php
+declare(strict_types=1);
+defined( 'ABSPATH' ) || exit;
+/**
+ * Core Class
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ *
+ */
+if (!class_exists('OPTNNO', false)) {
+#[\AllowDynamicProperties]
+class OPTNNO {
+        public static $settings = array();
+        public static $tabs = array();
+        public static $fields = array();
+        public function __construct() {
+            add_action('init', [$this,'setup']);
+            add_action('after_setup_theme', [$this,'setup']);
+            add_action('switch_theme', [$this,'setup']);
+            add_action('wp_enqueue_scripts', [$this,'wp_scripts']);
+            add_action('wp_head', [$this,'wp_head']);
+            add_action('admin_menu', [$this,'create_menu']);
+            add_action( 'init', [$this,'optionino_load_textdomain'] );
+            $this->setup_defaults();
+        }
+        
+        public function setup() {
+
+        }
+        public function setup_defaults() {
+            $get_fields = self::$fields;
+            
+            foreach ($get_fields as $dev_name => $tabs) {
+                $saved_data = get_option($dev_name, array());
+                if (!is_array($saved_data)) {
+                    $saved_data = array();
+                }
+                
+                $is_updated = false;
+
+                foreach ($tabs as $tab_name => $arrays) {
+                    foreach ($arrays as $names => $field) {
+                        if ( ! array_key_exists($field['id'], $saved_data) && isset($field['default']) ) {
+                            $saved_data[$field['id']] = $field['default'];
+                            $is_updated = true;
+                        }
+                    }
+                }
+
+                if ($is_updated) {
+                    update_option($dev_name, $saved_data);
+                }
+            }
+        }
+        public static function set_config($dev_name, $settings) {
+            foreach (self::$settings as $existing_config) {
+                if ($existing_config['dev_name'] === $dev_name) {
+                    add_action('admin_notices', function() use ($dev_name) {
+                        echo __('<div class="error"><p>Configuration with ID "' . esc_html($dev_name) . '" is already in use. Please use a unique ID.</p></div>',OPTNNO_TEXTDOMAIN);
+                    });
+                    return;
+                }
+            }
+            $settings['dev_name'] = $dev_name;
+            self::$settings[$dev_name] = $settings;
+        }
+        public static function set_tab($dev_name, $tab_settings) {
+            if (!isset(self::$tabs[$dev_name])) {
+                self::$tabs[$dev_name] = array();
+            }
+            foreach (self::$tabs[$dev_name] as $existing_tab) {
+                if ($existing_tab['id'] === $tab_settings['id']) {
+                    add_action('admin_notices', function() use ($tab_settings) {
+                        echo __('<div class="error"><p>Tab ID "' . esc_html($tab_settings['id']) . '" is already in use. Please use a unique ID.</p></div>', OPTNNO_TEXTDOMAIN);
+                    });
+                    return;
+                }
+            }
+
+            $tab_id = $tab_settings['id'];
+
+            self::$tabs[$dev_name][$tab_id] = $tab_settings;
+
+            $fields_for_tab = array();
+            if (isset($tab_settings['fields']) && is_array($tab_settings['fields'])) {
+                $fields_for_tab = $tab_settings['fields'];
+            }
+
+            $fields = array();
+            $fields[$tab_id] = $fields_for_tab;
+            self::set_fields($dev_name, $fields);
+        }
+
+        public static function set_fields($dev_name, $tabfields) {
+            if (!isset(self::$fields[$dev_name])) {
+                self::$fields[$dev_name] = array();
+            }
+
+            $existingFieldIds = [];
+            foreach (self::$fields[$dev_name] as $existingTabFields) {
+                foreach ($existingTabFields as $existingField) {
+                    $existingFieldIds[] = $existingField['id'];
+                }
+            }
+
+            foreach ($tabfields as $tab => $fields) {
+                $tabFieldIds = array_column($fields, 'id');
+                foreach ($tabFieldIds as $fieldId) {
+                    if (in_array($fieldId, $existingFieldIds) || is_id_duplicate_optionino($tabFieldIds, $fieldId)) {
+                        add_action('admin_notices', function() use ($fieldId, $tab) {
+                            echo '<div class="error"><p>' . esc_html__('Field ID "' . $fieldId . '" is already in use. Please use a unique ID.', OPTNNO_TEXTDOMAIN) . '</p></div>';
+                        });
+                        return;
+                    }
+                }
+            }
+
+            foreach ($tabfields as $tab => $fields) {
+                self::$fields[$dev_name][$tab] = $fields;
+            }
+            $get_fields = self::$fields;
+            $fields_defaults = array();
+            foreach ($get_fields as $dev_name => $tabs) {
+                foreach ($tabs as $tab_name => $arrays) {
+                    foreach ($arrays as $names => $field) {
+                        foreach ($fields as $field) {
+                            if (!empty($field['default'])) {
+                                $fields_defaults[$field['id']] = $field['default'];
+                            }
+                        }
+                    }
+                }
+                $is_set_dev = get_option($dev_name, "");
+                if (empty($is_set_dev)) {
+                    OPTNNO_Ajax_Handler::defaults($dev_name, $fields_defaults);
+                }
+            }
+        }
+        public function create_menu() {
+            $all_settings = self::$settings;
+            $tabs = self::$tabs;
+            if (is_array($all_settings)) {
+                foreach ($all_settings as $dev_name => $config) {
+                    if (!is_array($config)) {
+                        continue;
+                    }
+                    $menu_type     = $config['menu_type'] ?? 'menu';
+                    $dev_title     = $config['dev_title'] ?? '';
+                    $menu_title    = $config['menu_title'] ?? '';
+                    $capability    = $config['page_capability'] ?? 'manage_options';
+                    $page_slug     = $config['page_slug'] ?? $dev_name;
+                    $icon_url      = $config['icon_url'] ?? '';
+                    $menu_priority = $config['menu_priority'] ?? 80;
+
+                    if ($menu_type == 'menu') {
+                        add_menu_page(
+                            $dev_title,
+                            $menu_title,
+                            $capability,
+                            $page_slug,
+                            function () use ($config) {
+                                $this->page_content($config);
+                            },
+                            $icon_url,
+                            $menu_priority
+                        );
+                    } elseif ($menu_type == 'submenu') {
+                        $page_parent = $config['page_parent'] ?? 'options-general.php';
+                        add_submenu_page(
+                            $page_parent,
+                            $dev_title,
+                            $menu_title,
+                            $capability,
+                            $page_slug,
+                            function () use ($config) {
+                                $this->page_content($config);
+                            },
+                            $menu_priority
+                        );
+                    }
+                }
+            }
+        }
+        public function page_content($settings) {
+            require_once ( defined('OPTNNO_TMPL') ? OPTNNO_TMPL : ( defined('OPTNNO_INC') ? OPTNNO_INC . 'templates/' : __DIR__ . '/../templates/' ) ) . 'setting-page.php';
+            add_filter( 'admin_footer_text', [$this,'admin_footer_text'] );
+        }
+        public function admin_footer_text() {
+            _e('Options Page powered by <a href="https://github.com/shokrino/optionino-framework" target="_blank">Optionino Framework</a>',OPTNNO_TEXTDOMAIN);
+        }
+        public function optionino_load_textdomain() {
+            $locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
+            $locale = apply_filters( 'plugin_locale', $locale, OPTNNO_TEXTDOMAIN );
+            
+            $mofile = OPTNNO_LANG . 'optionino-' . $locale . '.mo';
+            
+            if ( file_exists( $mofile ) ) {
+                load_textdomain( OPTNNO_TEXTDOMAIN, $mofile );
+            } else {
+                $plugin_rel_path = str_replace( WP_PLUGIN_DIR . '/', '', OPTNNO_LANG );
+                load_plugin_textdomain( OPTNNO_TEXTDOMAIN, false, dirname( $plugin_rel_path ) . '/languages' );
+            }
+        }
+        public function wp_scripts() {
+            wp_enqueue_script('jquery');
+        }
+        public function admin_scripts() {
+            if (!did_action('wp_enqueue_media')) {
+                wp_enqueue_media();
+            }
+            wp_enqueue_style('wp-color-picker');
+            wp_enqueue_script('wp-color-picker');
+            wp_enqueue_style( 'optionino-settings-page', OPTNNO_ASSETS.'css/setting.css', array(), false, 'all');
+            wp_enqueue_script( 'optionino-settings-page', OPTNNO_ASSETS.'js/setting.js' , array() , false , true);
+            wp_localize_script( 'optionino-settings-page', 'data_optionino', array(
+                'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'nonce' => wp_create_nonce('optionino_nonce')
+            ));
+        }
+        public function wp_head() {
+
+        }
+    }
+    new OPTNNO;
+}

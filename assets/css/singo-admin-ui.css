@@ -1,0 +1,553 @@
+/**
+ * Singo Tools - Global Admin UI Toolkit (Optionino Harmonized)
+ *
+ * Provides shared, high-performance UI components for all modules:
+ * - One-click Copy Buttons with Toast feedback
+ * - Status Badges (Success, Warning, Danger, Info)
+ * - Educational Guide Cards
+ * - KPI Metric Cards & Progress Bars
+ * - Polished Action Buttons
+ *
+ * Design System Palette: Optionino Primary (#ad6141 / #b16241)
+ * Typography: Strictly inherits system font-family.
+ *
+ * @package SingoTools
+ * @since 4.2.0
+ */
+
+:root {
+	--singo-primary: #ad6141;
+	--singo-primary-hover: #934e32;
+	--singo-primary-light: rgba(173, 97, 65, 0.08);
+	--singo-primary-border: rgba(173, 97, 65, 0.25);
+	
+	--singo-success: #16a34a;
+	--singo-success-bg: #f0fdf4;
+	--singo-success-border: #bbf7d0;
+
+	--singo-warning: #d97706;
+	--singo-warning-bg: #fffbeb;
+	--singo-warning-border: #fde68a;
+
+	--singo-danger: #dc2626;
+	--singo-danger-bg: #fef2f2;
+	--singo-danger-border: #fecaca;
+
+	--singo-info: #0284c7;
+	--singo-info-bg: #f0f9ff;
+	--singo-info-border: #bae6fd;
+
+	--singo-gray-50: #f8fafc;
+	--singo-gray-100: #f1f5f9;
+	--singo-gray-200: #e2e8f0;
+	--singo-gray-300: #cbd5e1;
+	--singo-gray-500: #64748b;
+	--singo-gray-700: #334155;
+	--singo-gray-800: #1e293b;
+	--singo-gray-900: #0f172a;
+}
+
+/* =============================================================================
+   1. GLOBAL RESET & TYPOGRAPHY
+   ============================================================================= */
+
+.singo-ui-container,
+.singo-ui-container *,
+.singo-card,
+.singo-card *,
+.singo-copy-btn,
+.singo-badge,
+.singo-guide-card,
+.singo-kpi-card,
+.singo-toast {
+	box-sizing: border-box !important;
+}
+
+.singo-ui-container,
+.singo-ui-container *:not(.dashicons),
+.singo-card,
+.singo-card *:not(.dashicons),
+.singo-copy-btn,
+.singo-copy-btn *:not(.dashicons),
+.singo-badge,
+.singo-badge *:not(.dashicons),
+.singo-guide-card,
+.singo-guide-card *:not(.dashicons),
+.singo-kpi-card,
+.singo-kpi-card *:not(.dashicons),
+.singo-toast,
+.singo-toast *:not(.dashicons) {
+	font-family: inherit !important;
+}
+
+.singo-ui-container .dashicons,
+.singo-card .dashicons,
+.singo-copy-btn .dashicons,
+.singo-badge .dashicons,
+.singo-guide-card .dashicons,
+.singo-kpi-card .dashicons,
+.singo-toast .dashicons,
+.dashicons {
+	font-family: dashicons !important;
+	font-style: normal !important;
+	font-weight: 400 !important;
+}
+
+/* =============================================================================
+   2. REUSABLE COPY BUTTONS & WIDGETS
+   ============================================================================= */
+
+.singo-copy-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 6px !important;
+	padding: 5px 12px !important;
+	background: #ffffff !important;
+	color: var(--singo-primary) !important;
+	border: 1px solid var(--singo-primary-border) !important;
+	border-radius: 6px !important;
+	font-size: 12.5px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	transition: all 0.15s ease-in-out !important;
+	user-select: none !important;
+	text-decoration: none !important;
+	line-height: 1.4 !important;
+}
+
+.singo-copy-btn:hover {
+	background: var(--singo-primary-light) !important;
+	border-color: var(--singo-primary) !important;
+	color: var(--singo-primary-hover) !important;
+}
+
+.singo-copy-btn:active {
+	transform: scale(0.97) !important;
+}
+
+.singo-copy-btn .dashicons {
+	font-size: 15px !important;
+	width: 15px !important;
+	height: 15px !important;
+	line-height: 15px !important;
+	margin: 0 !important;
+}
+
+.singo-copy-btn.singo-copied {
+	background: var(--singo-success-bg) !important;
+	border-color: var(--singo-success-border) !important;
+	color: var(--singo-success) !important;
+}
+
+.singo-copy-btn.singo-copied .dashicons {
+	color: var(--singo-success) !important;
+}
+
+/* Inline Code with Embedded Copy Button */
+.singo-copyable-code-box {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	background: var(--singo-gray-100) !important;
+	border: 1px solid var(--singo-gray-200) !important;
+	padding: 4px 6px 4px 10px !important;
+	border-radius: 6px !important;
+	direction: ltr !important;
+	font-family: monospace !important;
+	font-size: 13px !important;
+}
+
+.singo-copyable-code-box code {
+	background: transparent !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	color: var(--singo-primary) !important;
+	font-weight: 700 !important;
+}
+
+/* =============================================================================
+   3. TOAST NOTIFICATION SYSTEM
+   ============================================================================= */
+
+.singo-toast-container {
+	position: fixed !important;
+	bottom: 24px !important;
+	left: 24px !important;
+	z-index: 999999 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 10px !important;
+	pointer-events: none !important;
+}
+
+.singo-toast {
+	pointer-events: auto !important;
+	min-width: 260px !important;
+	max-width: 380px !important;
+	background: #ffffff !important;
+	color: var(--singo-gray-800) !important;
+	border-radius: 8px !important;
+	padding: 12px 16px !important;
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+	border-right: 4px solid var(--singo-primary) !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 10px !important;
+	font-size: 13.5px !important;
+	font-weight: 600 !important;
+	line-height: 1.5 !important;
+	direction: rtl !important;
+	animation: singoToastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+	transition: opacity 0.25s ease, transform 0.25s ease !important;
+}
+
+.singo-toast--success {
+	border-right-color: var(--singo-success) !important;
+}
+.singo-toast--success .dashicons {
+	color: var(--singo-success) !important;
+}
+
+.singo-toast--warning {
+	border-right-color: var(--singo-warning) !important;
+}
+.singo-toast--warning .dashicons {
+	color: var(--singo-warning) !important;
+}
+
+.singo-toast--danger {
+	border-right-color: var(--singo-danger) !important;
+}
+.singo-toast--danger .dashicons {
+	color: var(--singo-danger) !important;
+}
+
+.singo-toast--info {
+	border-right-color: var(--singo-info) !important;
+}
+.singo-toast--info .dashicons {
+	color: var(--singo-info) !important;
+}
+
+.singo-toast.singo-toast--fadeout {
+	opacity: 0 !important;
+	transform: translateY(10px) !important;
+}
+
+@keyframes singoToastIn {
+	from {
+		opacity: 0;
+		transform: translateY(15px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* =============================================================================
+   4. STATUS BADGES
+   ============================================================================= */
+
+.singo-badge {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 5px !important;
+	padding: 2px 8px !important;
+	border-radius: 5px !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	line-height: 1.5 !important;
+	border: 1px solid transparent !important;
+}
+
+.singo-badge .dashicons {
+	font-size: 13px !important;
+	width: 13px !important;
+	height: 13px !important;
+	line-height: 13px !important;
+}
+
+.singo-badge--primary {
+	background: var(--singo-primary-light) !important;
+	color: var(--singo-primary) !important;
+	border-color: var(--singo-primary-border) !important;
+}
+
+.singo-badge--success {
+	background: var(--singo-success-bg) !important;
+	color: var(--singo-success) !important;
+	border-color: var(--singo-success-border) !important;
+}
+
+.singo-badge--warning {
+	background: var(--singo-warning-bg) !important;
+	color: var(--singo-warning) !important;
+	border-color: var(--singo-warning-border) !important;
+}
+
+.singo-badge--danger {
+	background: var(--singo-danger-bg) !important;
+	color: var(--singo-danger) !important;
+	border-color: var(--singo-danger-border) !important;
+}
+
+.singo-badge--info {
+	background: var(--singo-info-bg) !important;
+	color: var(--singo-info) !important;
+	border-color: var(--singo-info-border) !important;
+}
+
+.singo-badge--neutral {
+	background: var(--singo-gray-100) !important;
+	color: var(--singo-gray-700) !important;
+	border-color: var(--singo-gray-200) !important;
+}
+
+/* =============================================================================
+   5. OPTIONINO-HARMONIZED CARDS & CONTAINERS
+   ============================================================================= */
+
+.singo-card {
+	background: #ffffff !important;
+	border: 1px solid var(--singo-gray-200) !important;
+	border-radius: 10px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	margin-bottom: 20px !important;
+	overflow: hidden !important;
+	transition: box-shadow 0.2s ease !important;
+}
+
+.singo-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+.singo-card-header {
+	padding: 14px 18px !important;
+	background: var(--singo-gray-50) !important;
+	border-bottom: 1px solid var(--singo-gray-200) !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	gap: 12px !important;
+}
+
+.singo-card-title {
+	font-size: 14.5px !important;
+	font-weight: 700 !important;
+	color: var(--singo-gray-800) !important;
+	margin: 0 !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+}
+
+.singo-card-title .dashicons {
+	color: var(--singo-primary) !important;
+	font-size: 20px !important;
+	width: 20px !important;
+	height: 20px !important;
+	line-height: 20px !important;
+}
+
+.singo-card-body {
+	padding: 18px !important;
+}
+
+/* =============================================================================
+   6. SERVER & SYSTEM KPI METRIC CARDS
+   ============================================================================= */
+
+.singo-kpi-grid {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+	gap: 16px !important;
+	margin-bottom: 20px !important;
+}
+
+.singo-kpi-card {
+	background: var(--singo-gray-50) !important;
+	border: 1px solid var(--singo-gray-200) !important;
+	border-radius: 8px !important;
+	padding: 14px 16px !important;
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 8px !important;
+	transition: transform 0.15s ease, border-color 0.15s ease !important;
+}
+
+.singo-kpi-card:hover {
+	border-color: var(--singo-primary-border) !important;
+	transform: translateY(-2px) !important;
+}
+
+.singo-kpi-header {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	gap: 6px !important;
+}
+
+.singo-kpi-label {
+	font-size: 12.5px !important;
+	font-weight: 600 !important;
+	color: var(--singo-gray-500) !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+}
+
+.singo-kpi-label .dashicons {
+	font-size: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	line-height: 16px !important;
+	color: var(--singo-primary) !important;
+}
+
+.singo-kpi-value {
+	font-size: 16px !important;
+	font-weight: 800 !important;
+	color: var(--singo-gray-900) !important;
+	line-height: 1.3 !important;
+}
+
+.singo-kpi-subtext {
+	font-size: 11.5px !important;
+	color: var(--singo-gray-500) !important;
+}
+
+.singo-progress-bar {
+	width: 100% !important;
+	height: 7px !important;
+	background: var(--singo-gray-200) !important;
+	border-radius: 99px !important;
+	overflow: hidden !important;
+	margin-top: 4px !important;
+}
+
+.singo-progress-fill {
+	height: 100% !important;
+	background: var(--singo-primary) !important;
+	border-radius: 99px !important;
+	transition: width 0.3s ease !important;
+}
+
+.singo-progress-fill--success { background: var(--singo-success) !important; }
+.singo-progress-fill--warning { background: var(--singo-warning) !important; }
+.singo-progress-fill--danger  { background: var(--singo-danger) !important; }
+
+/* =============================================================================
+   7. EDUCATIONAL GUIDE CARDS
+   ============================================================================= */
+
+.singo-guide-card {
+	background: var(--singo-gray-50) !important;
+	border: 1px solid var(--singo-gray-200) !important;
+	border-right: 4px solid var(--singo-primary) !important;
+	border-radius: 8px !important;
+	padding: 14px 18px !important;
+	margin: 12px 0 !important;
+}
+
+.singo-guide-title {
+	font-size: 13.5px !important;
+	font-weight: 700 !important;
+	color: var(--singo-primary) !important;
+	margin-bottom: 10px !important;
+	display: flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+}
+
+.singo-guide-title .dashicons {
+	font-size: 17px !important;
+	width: 17px !important;
+	height: 17px !important;
+}
+
+.singo-guide-list {
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 9px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	list-style: none !important;
+}
+
+.singo-guide-item {
+	display: flex !important;
+	align-items: flex-start !important;
+	gap: 10px !important;
+	font-size: 13px !important;
+	line-height: 1.7 !important;
+	color: var(--singo-gray-700) !important;
+}
+
+.singo-guide-badge {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 22px !important;
+	height: 22px !important;
+	background: var(--singo-primary-light) !important;
+	color: var(--singo-primary) !important;
+	border-radius: 50% !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	line-height: 1 !important;
+	margin-top: 2px !important;
+	flex-shrink: 0 !important;
+}
+
+/* =============================================================================
+   8. ACTION BUTTONS
+   ============================================================================= */
+
+.singo-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 6px !important;
+	height: 36px !important;
+	padding: 0 16px !important;
+	border-radius: 6px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	transition: all 0.15s ease !important;
+	text-decoration: none !important;
+	border: 1px solid transparent !important;
+}
+
+.singo-btn--primary {
+	background: var(--singo-primary) !important;
+	color: #ffffff !important;
+	border-color: var(--singo-primary) !important;
+}
+.singo-btn--primary:hover {
+	background: var(--singo-primary-hover) !important;
+	color: #ffffff !important;
+}
+
+.singo-btn--secondary {
+	background: #ffffff !important;
+	color: var(--singo-gray-700) !important;
+	border-color: var(--singo-gray-300) !important;
+}
+.singo-btn--secondary:hover {
+	background: var(--singo-gray-50) !important;
+	color: var(--singo-gray-900) !important;
+	border-color: var(--singo-gray-400) !important;
+}
+
+.singo-btn--danger {
+	background: #ffffff !important;
+	color: var(--singo-danger) !important;
+	border-color: var(--singo-danger-border) !important;
+}
+.singo-btn--danger:hover {
+	background: var(--singo-danger-bg) !important;
+	border-color: var(--singo-danger) !important;
+}
