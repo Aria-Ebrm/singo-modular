@@ -182,16 +182,19 @@ singo-modular/
 
 ---
 
-## 🤝 Contributing & Submitting Modules
+## 🤝 Contributing & Community Modules
 
-We welcome community contributions! If you have built a useful, high-performance module that follows our [Module Development Guidelines](MODULE_RULES.md):
+We actively welcome community contributions! If you have developed a useful, well-crafted module for WordPress, feel free to open a Pull Request. Suitable and well-architected modules will be reviewed and merged into the public repository.
 
-1. **Fork** this repository and create your feature branch.
-2. Place your self-contained module inside `modules/your-module-name/`.
-3. Ensure it strictly adheres to the **Default-Inactive** rule, **Zero Disk Scanning** policy, and PHP 8+ strict typing.
-4. Submit a **Pull Request (PR)** with a concise overview of what your module does.
+### ⚠️ Contribution Standards Checklist
+Before submitting a module, please review and ensure compliance with our comprehensive [Module Development Guidelines (MODULE_RULES.md)](MODULE_RULES.md):
 
-Every contribution will be reviewed, and upon meeting the architecture standards, we will gladly merge and feature it publicly in the official repository!
+1. **Self-Contained & Decoupled:** Place your module entirely within its dedicated directory (`modules/your-module-name/`) and inherit from `AbstractModule`. **Never modify core files or the `optionino/` framework**.
+2. **Zero Disk Scanning Policy:** Do not use `glob`, `scandir`, or runtime directory traversal. All module discovery is managed via `ManifestManager` database caching.
+3. **Disabled by Default (Default-Inactive):** Every new module switcher must default to **`false`** (`'default' => false`). Features must never be auto-enabled upon installation.
+4. **Modern PHP 8+ Strictness:** Every PHP file must begin with `declare(strict_types=1);` and include explicit type hinting for all arguments and return types.
+5. **Security & Sanitization:** Follow WordPress security best practices (sanitize inputs, escape all outputs, and enforce capability/nonce checks).
+6. **Smart Placement Strategy:** Select the appropriate placement pattern: **Dedicated Tab** (`dedicated_tab`) for complex suites or the shared **Other Tools Tab** (`other_tools`) for compact utilities.
 
 ---
 
