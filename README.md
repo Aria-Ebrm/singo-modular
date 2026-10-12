@@ -1,9 +1,6 @@
 <div align="center">
 
-  <a href="https://github.com/Aria-Ebrm/singo-modular">
     <img src="assets/banner.svg" alt="Singo Modular Banner" width="100%">
-  </a>
-
 
 # Singo Modular
 
