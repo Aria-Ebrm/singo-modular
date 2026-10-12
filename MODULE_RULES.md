@@ -1,56 +1,56 @@
-# 📐 مستند و راهنمای جامع توسعه ماژول‌ها (MODULE_RULES.md)
-## 📌 افزونه ماژولار سینگو (Singo Modular Architecture)
+# 📐 Comprehensive Module Development Specification (MODULE_RULES.md)
+## 📌 Singo Modular Architecture
 
-این سند مرجع فنی و راهنمای استاندارد برنامه‌نویسی برای ساخت و افزودن ماژول‌های جدید به **افزونه ماژولار سینگو** است. تمامی ماژول‌ها در این معماری به صورت **خودکفا (Self-Contained)**، مستقل و بدون نیاز به دستکاری فایل‌های هسته افزونه یا فریم‌ورک Optionino طراحی می‌شوند.
+This document serves as the official technical reference and standard coding guideline for authoring and integrating new modules into **Singo Modular**. All modules within this framework are architected to be **Self-Contained**, fully decoupled, and require zero modifications to the core plugin files or the Optionino framework.
 
 ---
 
-## 🏛️ ۱. ارکان اصلی معماری ماژولار
+## 🏛️ 1. Architectural Pillars
 
-معماری این افزونه از ۴ لایه به هم پیوسته تشکیل شده است:
+The modular framework is constructed of four interconnected layers:
 
 ```mermaid
 flowchart TD
-    A["ماژول‌های خودکفا (modules/*)"] -->|ارث‌بری| B["کلاس پایه AbstractModule"]
-    B --> C["مدیریت مانیفست (ManifestManager)"]
-    C -->|کش در دیتابیس / Zero Disk Scan| D["مدیریت ماژول‌ها (ModuleManager)"]
-    D -->|تزریق پویای فیلدها و تب‌ها| E["تنظیمات بومی Optionino"]
-    D -->|اجرای هوک‌ها| F["چرخه حیات وردپرس (WordPress Init)"]
+    A["Self-Contained Modules (modules/*)"] -->|Inherits| B["Base AbstractModule"]
+    B --> C["Manifest Manager (ManifestManager)"]
+    C -->|Database Cache / Zero Disk Scan| D["Module Manager (ModuleManager)"]
+    D -->|Dynamic Injection of Tabs & Fields| E["Native Optionino Panel"]
+    D -->|Executes Hooks & Lifecycle| F["WordPress Lifecycle (init / wp)"]
 ```
 
-1. **`AbstractModule` (`includes/Core/AbstractModule.php`):** کلاس پایه انتزاعی که هر ماژول باید از آن ارث‌بری کند.
-2. **`ManifestManager` (`includes/Core/ManifestManager.php`):** کاشف خودکار ماژول‌ها در زمان نصب، ارتقا یا بروزرسانی و کش‌کننده دائمی ساختار ماژول‌ها در دیتابیس.
-3. **`ModuleManager` (`includes/Core/ModuleManager.php`):** نمونه‌ساز و کنترل‌کننده فعال/غیرفعال بودن ماژول‌ها در زمان اجرای وردپرس.
-4. **`Optionino` (`optionino/`):** فریم‌ورک رابط کاربری پنل مدیریت (۱۰۰٪ Read-Only و دست‌نخورده).
+1. **`AbstractModule` (`includes/Core/AbstractModule.php`):** The abstract contract that every module must extend.
+2. **`ManifestManager` (`includes/Core/ManifestManager.php`):** Discovers modules upon activation, update, or settings save and caches module metadata permanently in the database.
+3. **`ModuleManager` (`includes/Core/ModuleManager.php`):** Responsible for instantiating enabled modules and orchestrating their runtime execution.
+4. **`Optionino` (`optionino/`):** Admin panel UI framework (100% read-only and unmodified).
 
 ---
 
-## 📂 ۲. ساختار پوشه‌بندی هر ماژول
+## 📂 2. Module Directory Structure
 
-هر ماژول باید درون یک پوشه اختصاصی با شناسه ماژول (`kebab-case`) در مسیر `modules/` مستقر شود:
+Each module must reside in its own dedicated directory in `modules/`, named using `kebab-case`:
 
 ```
 modules/my-custom-module/
-├── MyCustomModule.php          # فایل کلاس اصلی (نام StudlyCaps + Module.php)
-├── assets/                     # دارایی‌های لوکال (CSS / JS / Images)
-└── includes/                   # کلاس‌ها و فایل‌های کمکی داخلی ماژول
+├── MyCustomModule.php          # Main module class (StudlyCaps + Module.php)
+├── assets/                     # Module assets (CSS / JS / Images)
+└── includes/                   # Internal helper classes and sub-components
 ```
 
 ---
 
-## 🧭 ۳. قوانین جای‌گذاری در پنل تنظیمات (Module Placement)
+## 🧭 3. Admin Panel Placement Rules
 
-هر ماژول بسته به وسعت تنظیمات خود، یکی از دو استراتژی زیر را برای جای‌گذاری در پنل انتخاب می‌کند:
+Depending on the complexity and scope of the settings, each module selects one of two placement strategies:
 
-### حالت اول: ماژول با تب اختصاصی (`dedicated_tab`)
-برای ماژول‌های بزرگ یا چندبخشی (مانند ماژول نمونه **تاریخ شمسی**).
-- **متد `get_placement()`:** برگرداندن `'dedicated_tab'` (یا عدم تعریف متد، چون پیش‌فرض همین است).
-- **متد `get_order()`:** تعیین اولویت نمایش تب (مثلاً `10`, `20`, `30`).
-- **متد `get_optionino_tab()`:** برگرداندن ساختار تب با آرایه `fields`.
+### Strategy A: Dedicated Tab (`dedicated_tab`)
+Ideal for large or multi-section modules (e.g., the bundled **Solar Hijri Date** module).
+- **Method `get_placement()`:** Returns `'dedicated_tab'` (or omitted, as this is the default in `AbstractModule`).
+- **Method `get_order()`:** Determines tab position priority (e.g., `10`, `20`, `30`).
+- **Method `get_optionino_tab()`:** Returns the tab schema definition array with an internal `fields` array.
 
 ```php
 public static function get_placement(): string {
-    return 'dedicated'; // پیش‌فرض AbstractModule
+    return 'dedicated_tab';
 }
 
 public static function get_order(): int {
@@ -63,17 +63,17 @@ public function get_optionino_tab(): ?array {
         'title'  => self::get_name(),
         'icon'   => self::get_icon(),
         'fields' => array(
-            // فیلدهای Optionino
+            // Optionino field definitions
         ),
     );
 }
 ```
 
-### حالت دوم: ماژول سبک در تب سایر امکانات (`other_tools`)
-برای ماژول‌های تک‌منظوره یا سبک (مانند ماژول نمونه **زمان تخمینی مطالعه**).
-- **متد `get_placement()`:** برگرداندن مقدار صریح `'other_tools'`.
-- **متد `get_optionino_fields()`:** برگرداندن آرایه فیلدهای ماژول.
-- **رفتار خودکار هسته:** هسته افزونه تمام فیلدهای این ماژول‌ها را در یک تب مشترک به نام **«سایر امکانات»** با اولویت آخر (`PHP_INT_MAX`) تجمیع می‌کند. اگر هیچ ماژولی در این تب نباشد، تب به صورت خودکار کاملاً حذف می‌شود.
+### Strategy B: Lightweight Feature in "Other Tools" Tab (`other_tools`)
+Ideal for single-purpose utilities or compact tools (e.g., the bundled **Estimated Reading Time** module).
+- **Method `get_placement()`:** Returns `'other_tools'`.
+- **Method `get_optionino_fields()`:** Returns an array of field definitions.
+- **Automatic Core Behavior:** The core consolidates all fields from `other_tools` modules into a unified tab titled **"Other Tools"** positioned at the end (`PHP_INT_MAX`). If no modules use this strategy, the tab is automatically omitted.
 
 ```php
 public static function get_placement(): string {
@@ -86,7 +86,7 @@ public function get_optionino_fields(): array {
             'id'      => 'enable_my_feature',
             'type'    => 'switcher',
             'title'   => self::get_name(),
-            'desc'    => 'توضیحات عملکرد قابلیت.',
+            'desc'    => 'Toggle this feature on or off.',
             'default' => false,
         ),
     );
@@ -95,17 +95,17 @@ public function get_optionino_fields(): array {
 
 ---
 
-## ⚡ ۴. سیاست عدم اسکن دیسک در ران‌تایم (Zero Disk Scanning)
+## ⚡ 4. Zero Disk Scanning Runtime Policy
 
 > [!IMPORTANT]
-> در هر لود صفحه وردپرس (Front-end یا Back-end)، هیچ فایلی از دیسک اسکن یا خوانده نمی‌شود (`glob`, `scandir` ممنوع).
+> On every WordPress page request (both frontend and backend), no filesystem scanning (`glob`, `scandir`) is permitted.
 
-- فهرست ماژول‌های موجود در دیتابیس در کلید `singo_modular_modules_manifest` کش می‌شود.
-- بازسازی مانیفست صرفاً در شرایط زیر انجام می‌گیرد:
-  1. هنگام فعال‌سازی افزونه (`register_activation_hook`).
-  2. هنگام ارتقا و آپدیت افزونه (`upgrader_process_complete`).
-  3. هنگام ذخیره تنظیمات در پنل ادمین.
-- برای فراخوانی فایل‌ها یا آدرس‌ها داخل ماژول، صرفاً از متدهای خودکفا استفاده شود:
+- The registry of active modules is cached in the WordPress database under the option `singo_modular_modules_manifest`.
+- Manifest rebuilding is strictly confined to lifecycle triggers:
+  1. Plugin activation hook (`register_activation_hook`).
+  2. Plugin upgrade completion (`upgrader_process_complete`).
+  3. Settings panel save operations.
+- To resolve file paths or URLs within a module, use the built-in helper methods:
   ```php
   $css_file = $this->get_path( 'assets/style.css' );
   $css_url  = $this->get_url( 'assets/style.css' );
@@ -113,29 +113,29 @@ public function get_optionino_fields(): array {
 
 ---
 
-## 🔒 ۵. قانون وضعیت اولیه غیرفعال (Default Inactive Rule)
+## 🔒 5. Default-Inactive Principle
 
 > [!CRITICAL]
-> **تمامی قابلیت‌ها و ماژول‌های جدید باید به صورت پیش‌فرض در حالت غیرفعال (`false`) باشند.**
+> **All new modules and features must be disabled by default (`false`).**
 > 
-> - مقدار فیلد سوئیچر در Optionino: `'default' => false`
-> - متد `is_enabled()`:
+> - Switcher field definition in Optionino: `'default' => false`
+> - Method `is_enabled()`:
 >   ```php
 >   public static function is_enabled(): bool {
 >       return (bool) singo_modular_get_option( 'my_module_switch', false );
 >   }
 >   ```
-> - کاربر باید پس از نصب به صفحه تنظیمات رفته و قابلیت مورد نظر را به اختیار خود روشن کند.
+> - Administrators must explicitly opt-in and toggle features on from the settings panel.
 
 ---
 
-## 🐘 ۶. استانداردهای کدنویسی
+## 🐘 6. Development & Coding Standards
 
-1. **PHP 8+ Strict Typing:** ابتدای تمامی فایل‌های PHP بدون استثنا:
+1. **PHP 8+ Strict Typing:** Every PHP file must declare strict types at line 1:
    ```php
    <?php
    declare(strict_types=1);
    ```
-2. **Type Hinting دقیق:** تمامی متغیرهای ورودی و خروجی متدها باید نوع مشخص داشته باشند (`: void`, `: string`, `: bool`, `: array`, `: ?array`, `: self`).
-3. **عدم ویرایش هسته Optionino:** پوشه `optionino/` کاملاً **Read-Only** است.
-4. **تایپوگرافی ارث‌بری‌شده:** در تمامی استایل‌های ادمین و فرانت از `font-family: inherit !important;` استفاده شود.
+2. **Strict Type Hinting:** All method arguments and return types must be explicitly declared (`: void`, `: string`, `: bool`, `: array`, `: ?array`, `: self`).
+3. **Immutability of Optionino Core:** The `optionino/` folder is strictly **Read-Only**.
+4. **Inherited Admin Typography:** All admin panel styles must use `font-family: inherit !important;` to respect the active dashboard font.

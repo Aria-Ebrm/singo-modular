@@ -1,40 +1,40 @@
-# 🧩 افزونه ماژولار سینگو (Singo Modular)
-### بویلرپلیت و فریم‌ورک استاندارد توسعه ماژولار برای وردپرس بر پایه Optionino
+# 🧩 Singo Modular WordPress Plugin Framework
+### Reference Architecture & Standard Boilerplate for Modular WordPress Development Powered by Optionino
 
-**افزونه ماژولار سینگو** یک معماری مدرن، خودکفا (Self-Contained) و فوق‌سریع برای توسعه امکانات در وردپرس است. این افزونه به عنوان یک **نمونه مرجع (Reference Implementation)** طراحی شده تا توسعه‌دهندگان بتوانند بدون دستکاری هسته افزونه یا دستکاری پنل تنظیمات، قابلیت‌های جدید را به صورت پلاگ‌اند‌پلی اضافه کنند.
-
----
-
-## 🌟 ویژگی‌های کلیدی معماری
-
-- ⚡ **سیاست عدم اسکن دیسک در ران‌تایم (Zero Disk Scanning):** تمامی ماژول‌ها توسط `ManifestManager` کش شده و هیچ اسکن فایلی در لود عادی صفحات رخ نمی‌دهد.
-- 🎨 **یکپارچه‌سازی ۱۰۰٪ بومی با Optionino:** بدون تغییر حتی یک خط از کد هسته `optionino/`، تب‌ها و فیلدهای هر ماژول به صورت پویا به پنل مدیریت تزریق می‌شوند.
-- 🧱 **دو الگوی استقرار ماژول (Dual Placement Strategy):**
-  - **تب اختصاصی (Dedicated Tab):** برای ماژول‌های بزرگ و چندبخشی.
-  - **سایر امکانات (Other Tools Tab):** برای ماژول‌های سبک و تک‌منظوره بدون شلوغ کردن منو.
-- 💾 **ذخیره‌سازی هوشمند تفاضلی (Delta Saving):** در زمان ذخیره تنظیمات، تنها کلیدهای تغییریافته ذخیره شده و از کوئری‌های سنگین به دیتابیس جلوگیری می‌شود.
-- 🛡️ **پیش‌فرض غیرفعال (Default Inactive):** تمام قابلیت‌ها در نصب اولیه خاموش هستند تا کنترل ۱۰۰٪ در دست مدیر سایت باشد.
-- 🐘 **استاندارد مدرن PHP 8+:** رعایت کامل `strict_types=1`، انواع داده‌ای صریح و امنیت پیشرفته وردپرس.
+**Singo Modular** is a modern, self-contained, lightning-fast architecture for developing WordPress features and plugins. Designed as a **Reference Implementation**, it enables developers to build and plug-in new features seamlessly without ever touching core plugin files or altering settings panel configurations.
 
 ---
 
-## 📦 ماژول‌های نمونه موجود در این مخزن
+## 🌟 Key Architectural Features
 
-این مخزن شامل دو ماژول آماده و بهینه به عنوان نمونه‌های کاربردی است:
+- ⚡ **Zero Disk Scanning at Runtime:** All modules are cached in the database via `ManifestManager`. Zero filesystem scanning (`glob` or `scandir`) occurs during standard page loads.
+- 🎨 **100% Native Optionino Integration:** Seamlessly injects module tabs and setting fields into the Optionino panel dynamically without modifying a single line of core `optionino/` code.
+- 🧱 **Dual Module Placement Strategy:**
+  - **Dedicated Tab (`dedicated_tab`):** For expansive, multi-feature modules with custom order and icons.
+  - **Other Tools Tab (`other_tools`):** For compact, single-purpose utilities to prevent admin menu clutter.
+- 💾 **Intelligent Delta Saving:** When saving admin options, only modified keys are written to the database, preventing heavy I/O overhead and redundant SQL queries.
+- 🛡️ **Default-Inactive Rule:** All new features and modules are disabled by default (`false`) upon installation, giving administrators complete control.
+- 🐘 **Modern PHP 8+ Standards:** Full compliance with `declare(strict_types=1);`, explicit type hinting, and strict WordPress security best practices.
 
-| ماژول | مسیر | نوع استقرار | عملکرد |
+---
+
+## 📦 Bundled Sample Modules
+
+This repository includes two production-grade sample modules illustrating both placement paradigms:
+
+| Module | Location | Placement Strategy | Description |
 | :--- | :--- | :--- | :--- |
-| **تاریخ شمسی** | `modules/shamsi-date/` | تب اختصاصی (`dedicated_tab`) | تبدیل کامل تاریخ‌های وردپرس، ووکامرس و المنتور به هجری شمسی به همراه ارقام فارسی. |
-| **زمان تخمینی مطالعه** | `modules/reading-time/` | تب سایر امکانات (`other_tools`) | محاسبه دقیق زمان مطالعه مقالات بر اساس کلمات فارسی و نیم‌فاصله با کش دو لایه و شورت‌کد `[reading_time]`. |
+| **Solar Hijri (Shamsi) Date** | `modules/shamsi-date/` | Dedicated Tab (`dedicated_tab`) | Complete Persian/Solar Hijri date conversion for WordPress core, WooCommerce, and Elementor with Persian numerals and datepickers. |
+| **Estimated Reading Time** | `modules/reading-time/` | Other Tools Tab (`other_tools`) | Accurate reading time calculation for posts with two-layer caching, Persian word counting, and `[reading_time]` shortcode support. |
 
 ---
 
-## 🚀 راهنمای سریع: چگونه یک ماژول جدید بسازیم؟
+## 🚀 Quick Start: How to Build a New Module
 
-برای اضافه کردن یک ماژول جدید، کافیست یک پوشه در `modules/` بسازید و کلاس آن را تعریف کنید:
+To add a new module, simply create a folder in `modules/` and define its module class inheriting from `AbstractModule`:
 
-### نمونه ۱: ساخت ماژول با تب اختصاصی
-در مسیر `modules/sms-notify/SmsNotifyModule.php`:
+### Pattern 1: Dedicated Tab Module
+At `modules/sms-notify/SmsNotifyModule.php`:
 
 ```php
 <?php
@@ -53,7 +53,7 @@ class SmsNotifyModule extends AbstractModule {
     }
 
     public static function get_name(): string {
-        return 'اطلاع‌رسانی پیامکی';
+        return 'SMS Notifications';
     }
 
     public static function get_icon(): string {
@@ -61,7 +61,7 @@ class SmsNotifyModule extends AbstractModule {
     }
 
     public static function get_order(): int {
-        return 20; // جایگاه قرارگیری تب در منو
+        return 20; // Tab positioning priority in the admin panel
     }
 
     public static function is_enabled(): bool {
@@ -77,7 +77,7 @@ class SmsNotifyModule extends AbstractModule {
                 array(
                     'id'      => 'enable_sms_notify',
                     'type'    => 'switcher',
-                    'title'   => 'فعال‌سازی ماژول',
+                    'title'   => 'Enable Module',
                     'default' => false,
                 ),
             ),
@@ -85,13 +85,13 @@ class SmsNotifyModule extends AbstractModule {
     }
 
     public function init(): void {
-        // هوک‌ها و منطق ماژول هنگام فعال بودن
+        // Module hooks and runtime logic when enabled
     }
 }
 ```
 
-### نمونه ۲: ساخت ماژول در تب «سایر امکانات»
-در مسیر `modules/copy-protect/CopyProtectModule.php`:
+### Pattern 2: Lightweight Module in "Other Tools" Tab
+At `modules/copy-protect/CopyProtectModule.php`:
 
 ```php
 <?php
@@ -110,11 +110,11 @@ class CopyProtectModule extends AbstractModule {
     }
 
     public static function get_name(): string {
-        return 'قفل راست‌کلیک';
+        return 'Content Protection';
     }
 
     public static function get_placement(): string {
-        return 'other_tools'; // ارسال به تب سایر امکانات
+        return 'other_tools'; // Routes fields to the shared "Other Tools" tab
     }
 
     public static function is_enabled(): bool {
@@ -127,51 +127,55 @@ class CopyProtectModule extends AbstractModule {
                 'id'      => 'enable_copy_protect',
                 'type'    => 'switcher',
                 'title'   => self::get_name(),
-                'desc'    => 'جلوگیری از کپی متن و راست‌کلیک در سایت.',
+                'desc'    => 'Prevents text selection and right-click copying on the frontend.',
                 'default' => false,
             ),
         );
+    }
+
+    public function init(): void {
+        // Module hooks and frontend scripts
     }
 }
 ```
 
 ---
 
-## 🏗️ ساختار پوشه‌های مخزن
+## 🏗️ Project Directory Structure
 
 ```
 singo-modular-plugin/
-├── singo-modular.php                   # فایل ریشه و راه‌انداز افزونه
-├── README.md                           # راهنمای کلی مخزن
-├── MODULE_RULES.md                     # استانداردهای فنی توسعه‌دهندگان
-├── .gitignore                          # قوانین نادیده گرفتن فایل‌ها
-├── assets/                             # دارایی‌های ادمین و برندینگ
+├── singo-modular.php                   # Plugin bootstrap and entry file
+├── README.md                           # Project documentation
+├── MODULE_RULES.md                     # Technical architecture & developer standards
+├── .gitignore                          # Git ignore specifications
+├── assets/                             # Admin UI styling & branding assets
 ├── includes/
-│   ├── helpers.php                     # توابع کمکی امن و کشینگ آپشن‌ها
-│   ├── class-singo-modular-core.php    # ارکستراتور و لودر مرکزی
-│   ├── class-singo-modular-optionino.php # یکپارچه‌ساز داینامیک Optionino
+│   ├── helpers.php                     # Secure helpers & static cached option getters
+│   ├── class-singo-modular-core.php    # Central lifecycle orchestrator
+│   ├── class-singo-modular-optionino.php # Dynamic Optionino panel integrator
 │   └── Core/
-│       ├── AbstractModule.php          # کلاس پایه ماژول‌ها
-│       ├── ManifestManager.php         # سیستم کاشف خودکار و کش مانیفست
-│       ├── ModuleManager.php           # منیجر لود ماژول‌ها
-│       └── DeltaManager.php            # سیستم ذخیره تفاضلی (Delta)
-├── modules/                            # پوشه مستقل ماژول‌ها
-│   ├── shamsi-date/                    # نمونه تب اختصاصی
-│   └── reading-time/                   # نمونه تب سایر امکانات
-└── optionino/                          # هسته Optionino (100% دست‌نخورده)
+│       ├── AbstractModule.php          # Base contract for all modules
+│       ├── ManifestManager.php         # Zero Disk Scanning manifest builder & cache
+│       ├── ModuleManager.php           # Runtime module instantiator & lifecycle manager
+│       └── DeltaManager.php            # Differential Delta saving mechanism
+├── modules/                            # Self-contained modules directory
+│   ├── shamsi-date/                    # Reference implementation: Dedicated Tab
+│   └── reading-time/                   # Reference implementation: Other Tools Tab
+└── optionino/                          # Optionino UI Framework (100% untouched)
 ```
 
 ---
 
-## 📋 نیازمندی‌های سیستم
+## 📋 System Requirements
 
-- **نسخه PHP:** 8.0 یا بالاتر (تست شده تا PHP 8.3)
-- **نسخه وردپرس:** 6.7 یا بالاتر
-- **ووکامرس (اختیاری):** جهت امکانات بخش فروشگاه
+- **PHP Version:** 8.0 or higher (tested up to PHP 8.3)
+- **WordPress Version:** 6.7 or higher
+- **WooCommerce (Optional):** Supported for e-commerce features
 
 ---
 
-## 📄 لایسنس
+## 📄 License
 
-این پروژه تحت مجوز [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html) منتشر شده است.
-توسعه یافته توسط **Singo Studio**.
+This project is licensed under the [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html).  
+Developed by **Singo Studio**.
