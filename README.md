@@ -56,7 +56,7 @@
 - **Server-Side Differential Merge (`includes/Core/DeltaManager.php`):** Compares inbound deltas against stored options via `pre_update_option`, eliminating redundant SQL `UPDATE` queries and preventing database write overhead.
 
 ### 3. 🎨 Native Optionino Integration & Dynamic Injection
-- **100% Core Immutability:** Seamlessly injects module settings into the [Optionino Framework](https://github.com/shokrino/optionino-framework) by [Matin Shokri](https://github.com/shokrino) without altering a single line of core `optionino/` code.
+- **100% Core Immutability:** Seamlessly injects module settings into the [Optionino Framework](https://github.com/shokrino/optionino-framework) by [Matin Shokri](https://github.com/shokrino) ([shokrino.com](https://shokrino.com)) without altering a single line of core `optionino/` code.
 - **Branded Admin UI:** Features customized admin styling, brand color theming, dynamic SVG logo integration, and inherited dashboard typography (`font-family: inherit !important;`).
 
 ### 4. 🧱 Dual Placement Strategy
@@ -245,7 +245,7 @@ singo-modular/
 
 ## 👏 Credits & Acknowledgements
 
-- **Optionino Framework:** Powered by the lightweight, developer-friendly WordPress settings framework created by **[Matin Shokri](https://github.com/shokrino)** ([shokrino/optionino-framework](https://github.com/shokrino/optionino-framework)).
+- **Optionino Framework:** Powered by the lightweight, developer-friendly WordPress settings framework created by **[Matin Shokri](https://github.com/shokrino)** ([shokrino.com](https://shokrino.com) / [GitHub Repository](https://github.com/shokrino/optionino-framework)).
 - **Architecture & Boilerplate:** Designed and maintained by **[Singo Studio](https://singo.studio)**.
 
 ---
