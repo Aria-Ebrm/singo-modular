@@ -83,7 +83,7 @@ class Singo_Shamsi_Converter {
 		}
 
 		// Convert digits and AM/PM if configured
-		if ( singo_tools_get_option( 'convert_digits', true ) ) {
+		if ( singo_tools_get_option( 'convert_digits', false ) ) {
 			$formatted = self::convert_to_persian_digits( $formatted );
 		}
 

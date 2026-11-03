@@ -32,7 +32,7 @@ class Singo_Shamsi_Elementor {
 		add_filter( 'elementor/dynamic_tags/post_time/value', array( $this, 'filter_elementor_dynamic_date' ), 20, 2 );
 
 		// 2. Elementor Pro Form Field & Atomic Date Picker
-		if ( (bool) singo_tools_get_option( 'enable_elementor_form_date', true ) ) {
+		if ( (bool) singo_tools_get_option( 'enable_elementor_form_date', false ) ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
 			add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'register_scripts' ) );
 			add_action( 'elementor/preview/enqueue_scripts', array( $this, 'register_scripts' ) );

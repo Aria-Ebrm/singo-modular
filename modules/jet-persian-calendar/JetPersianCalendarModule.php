@@ -46,7 +46,7 @@ class JetPersianCalendarModule extends AbstractModule {
 	}
 
 	public static function is_enabled(): bool {
-		return (bool) singo_tools_get_option( 'jet_calendar_master', true );
+		return (bool) singo_tools_get_option( 'jet_calendar_master', false );
 	}
 
 	public static function is_context_valid(): bool {
@@ -60,14 +60,14 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'فعال‌سازی تقویم فارسی افزونه‌های جت',
 				'desc'    => 'با خاموش کردن این گزینه، تقویم شمسی در تمامی افزونه‌های جت غیرفعال شده و به میلادی برمی‌گردد.',
-				'default' => true,
+				'default' => false,
 			),
 			array(
 				'id'      => 'jet_calendar_digits',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل اعداد تاریخ به فارسی',
 				'desc'    => 'نمایش تاریخ‌ها با اعداد فارسی (۰ تا ۹) در تمامی فیلدها و لیستینگ‌های جت.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -77,7 +77,7 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'یکپارچه‌سازی با JetEngine',
 				'desc'    => 'تقویم شمسی در متاباکس‌ها، CPT/CCT، مقادیر فیلدهای تاریخ در شبکه لیستینگ (Listing Grid) و فیلدهای پویا.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -87,7 +87,7 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'یکپارچه‌سازی با JetFormBuilder',
 				'desc'    => 'تقویم پاپ‌آپ شمسی در فیلدهای تاریخ و تاریخ/زمان فرم‌های ایجاد شده با فرم‌ساز کروکوبلاک.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -97,7 +97,7 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'یکپارچه‌سازی با JetBooking (رزرو اقامتگاه)',
 				'desc'    => 'تقویم بازه تاریخ شمسی در فرم‌های رزرو سمت کاربر و بخش مدیریت تقویم و تایم‌لاین رزروها.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -107,7 +107,7 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'یکپارچه‌سازی با JetAppointments (نوبت‌دهی)',
 				'desc'    => 'تقویم شمسی برای انتخاب اسلات‌های زمانی و روزهای نوبت‌دهی در فرم‌ها و پیشخوان مدیریت.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -117,7 +117,7 @@ class JetPersianCalendarModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'یکپارچه‌سازی با JetSmartFilters (فیلترها)',
 				'desc'    => 'پشتیبانی فیلترهای بازه تاریخی از تقویم شمسی و تبدیل خودکار به میلادی برای اجرای صحیح کوئری دیتابیس.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'jet_calendar_master', '==', true ),
 				),
@@ -150,42 +150,42 @@ class JetPersianCalendarModule extends AbstractModule {
 			return;
 		}
 
-		$module_path = $this->get_path();
-		$module_url  = $this->get_url();
+		$module_path = trailingslashit( $this->get_path() );
+		$module_url  = trailingslashit( $this->get_url() );
 		$version     = SINGO_TOOLS_VERSION;
 
 		// Load Core Utilities
 		require_once $module_path . 'includes/class-singo-jet-calendar-converter.php';
 		require_once $module_path . 'includes/class-singo-jet-calendar-helpers.php';
 
-		$convert_digits = (bool) singo_tools_get_option( 'jet_calendar_digits', true );
+		$convert_digits = (bool) singo_tools_get_option( 'jet_calendar_digits', false );
 
 		// 1. JetEngine Integration
-		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_engine', true ) ) {
+		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_engine', false ) ) {
 			require_once $module_path . 'includes/class-singo-jet-engine-integration.php';
 			new JetEngineIntegration( $module_url, $version, $convert_digits );
 		}
 
 		// 2. JetFormBuilder Integration
-		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_form_builder', true ) ) {
+		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_form_builder', false ) ) {
 			require_once $module_path . 'includes/class-singo-jet-form-builder-integration.php';
 			new JetFormBuilderIntegration( $module_url, $version );
 		}
 
 		// 3. JetBooking Integration
-		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_booking', true ) ) {
+		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_booking', false ) ) {
 			require_once $module_path . 'includes/class-singo-jet-booking-integration.php';
 			new JetBookingIntegration( $module_url, $version );
 		}
 
 		// 4. JetAppointments Integration
-		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_appointments', true ) ) {
+		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_appointments', false ) ) {
 			require_once $module_path . 'includes/class-singo-jet-appointments-integration.php';
 			new JetAppointmentsIntegration( $module_url, $version );
 		}
 
 		// 5. JetSmartFilters Integration
-		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_smart_filters', true ) ) {
+		if ( (bool) singo_tools_get_option( 'jet_calendar_jet_smart_filters', false ) ) {
 			require_once $module_path . 'includes/class-singo-jet-smart-filters-integration.php';
 			new JetSmartFiltersIntegration( $module_url, $version );
 		}

@@ -33,11 +33,18 @@ class ProductFeaturesModule extends AbstractModule {
 	}
 
 	public static function is_enabled(): bool {
-		return (bool) singo_tools_get_option( 'enable_product_features', true );
+		return (bool) singo_tools_get_option( 'enable_product_features', false );
 	}
 
 	public static function is_context_valid(): bool {
 		return class_exists( 'WooCommerce' );
+	}
+
+	public function __construct() {
+		if ( is_admin() ) {
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+			add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
+		}
 	}
 
 	public function get_optionino_tab(): ?array {
@@ -48,16 +55,18 @@ class ProductFeaturesModule extends AbstractModule {
 			'icon'   => self::get_icon(),
 			'fields' => array(
 				array(
-					'id'    => 'enable_product_features',
-					'type'  => 'switcher',
-					'title' => 'فعال‌سازی ماژول گروه‌بندی ویژگی‌ها',
-					'desc'  => 'با غیرفعال‌سازی این گزینه، تمام قابلیت‌های گروه‌بندی ویژگی‌ها غیرفعال شده و جدول ویژگی‌ها به حالت عادی ووکامرس برمی‌گردد.',
+					'id'      => 'enable_product_features',
+					'type'    => 'switcher',
+					'title'   => 'فعال‌سازی ماژول گروه‌بندی ویژگی‌ها',
+					'desc'    => 'با غیرفعال‌سازی این گزینه، تمام قابلیت‌های گروه‌بندی ویژگی‌ها غیرفعال شده و جدول ویژگی‌ها به حالت عادی ووکامرس برمی‌گردد.',
+					'default' => false,
 				),
 				array(
-					'id'    => 'mu_shortcode_info',
-					'type'  => 'text',
-					'title' => 'شورت‌کد اختصاصی نمایش ویژگی‌های محصول',
-					'desc'  => 'می‌توانید از این شورت‌کد در المنتور، برگه‌سازها، چیدمان محصول یا تب‌های اختصاصی قالب استفاده نمایید.',
+					'id'      => 'mu_shortcode_info',
+					'type'    => 'text',
+					'title'   => 'شورت‌کد اختصاصی نمایش ویژگی‌های محصول',
+					'desc'    => 'می‌توانید از این شورت‌کد در المنتور، برگه‌سازها، چیدمان محصول یا تب‌های اختصاصی قالب استفاده نمایید.',
+					'require' => array( array( 'enable_product_features', '==', true ) ),
 				),
 				array(
 					'id'           => 'mu_attribute_groups',
@@ -65,6 +74,7 @@ class ProductFeaturesModule extends AbstractModule {
 					'title'        => 'مدیریت و اولویت‌بندی گروه‌ها',
 					'button_title' => 'افزودن گروه',
 					'desc'         => 'برای تغییر اولویت گروه‌ها، آن‌ها را با ماوس بکشید و رها کنید (Drag & Drop). یک گروه را به عنوان پیش‌فرض مشخص نمایید.',
+					'require'      => array( array( 'enable_product_features', '==', true ) ),
 					'fields'       => array(
 						array(
 							'id'    => 'group_title',
@@ -84,10 +94,6 @@ class ProductFeaturesModule extends AbstractModule {
 
 	public function init(): void {
 		parent::init();
-
-		if ( is_admin() ) {
-			add_filter( 'option_singo_tools_options', array( $this, 'filter_default_options' ) );
-		}
 
 		$legacy_init = $this->get_path( 'product-features.php' );
 		if ( file_exists( $legacy_init ) ) {

@@ -357,11 +357,17 @@
     triggerRepeaterChange($field[0]);
   });
 
-  // Initialize on DOM Ready and on Tab switches
+  // Initialize on DOM Ready, Tab switches, and Switcher Toggles
   $(document).ready(function() {
     initShortcodeCopy();
     initProductFeaturesRepeater();
     $(document).on('click', '.tablinks', function() {
+      setTimeout(function() {
+        initShortcodeCopy();
+        initProductFeaturesRepeater();
+      }, 50);
+    });
+    $(document).on('change', '#enable_product_features', function() {
       setTimeout(function() {
         initShortcodeCopy();
         initProductFeaturesRepeater();

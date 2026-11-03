@@ -144,4 +144,137 @@
 		});
 	});
 
+	// =========================================================================
+	// OPTIONINO SKELETON LOADER TRANSITION (SMOOTH REVEAL)
+	// =========================================================================
+	function initOptioninoSkeletonTransition() {
+		var $skeleton = $('#singo-optionino-skeleton');
+		var $optionino = $('#optionino');
+		if (!$skeleton.length || !$optionino.length) {
+			return;
+		}
+
+		var revealed = false;
+		function revealRealContent() {
+			if (revealed) return;
+			revealed = true;
+
+			var $section = $optionino.find('.optionino-section');
+			$section.css({
+				'display': 'flex',
+				'opacity': '0'
+			});
+
+			$skeleton.css({
+				'opacity': '0',
+				'transition': 'opacity 0.22s ease-in-out'
+			});
+
+			setTimeout(function() {
+				$skeleton.remove();
+				$section.css({
+					'transition': 'opacity 0.25s ease-in-out',
+					'opacity': '1'
+				});
+			}, 220);
+		}
+
+		// Wait until document is ready and Optionino has stabilized
+		if (document.readyState === 'complete') {
+			setTimeout(revealRealContent, 100);
+		} else {
+			$(window).on('load', function() {
+				setTimeout(revealRealContent, 100);
+			});
+			// Robust fallback: maximum 650ms so user is never blocked
+			setTimeout(revealRealContent, 650);
+		}
+	}
+
+	// =========================================================================
+	// OPTIONINO TABS BULLETPROOF SWITCHING ENGINE
+	// =========================================================================
+	window.openTabOptnno = function(evt, tabName) {
+		if (!tabName) return;
+
+		var $container = $('#optionino');
+		var $tabContents = $container.find('.tabcontent');
+		var $tabLinks = $container.find('.tablinks');
+
+		// 1. Hide all tabcontents and remove active classes
+		$tabContents.hide().css('display', 'none').removeClass('active');
+		$tabLinks.removeClass('active');
+
+		// 2. Display the selected tabcontent by ID
+		var $target = $('#' + tabName);
+		if ($target.length) {
+			$target.show().css('display', 'block').addClass('active');
+		}
+
+		// 3. Mark the corresponding tablink button as active
+		if (evt && evt.currentTarget) {
+			$(evt.currentTarget).addClass('active');
+		} else {
+			$container.find('.tablinks[onclick*="' + tabName + '"]').addClass('active');
+		}
+
+		// 4. Synchronize Optionino Save Changes box visibility
+		if (tabName === 'price_list_export_tab' || tabName === 'price_list_category_colors_tab' || tabName === 'price_list_download_reports_tab') {
+			$('.optionino-options-save-box').stop(true, true).hide();
+		} else {
+			$('.optionino-options-save-box').stop(true, true).show();
+		}
+	};
+
+	function initOptioninoTabs() {
+		var $container = $('#optionino');
+		if (!$container.length) return;
+
+		var $tabLinks = $container.find('.tablinks');
+		var $tabContents = $container.find('.tabcontent');
+		if (!$tabLinks.length || !$tabContents.length) return;
+
+		var $activeLink = $tabLinks.filter('.active');
+		if (!$activeLink.length) {
+			// Find tabName from first tablink's onclick attribute
+			var onclickAttr = $tabLinks.first().attr('onclick') || '';
+			var match = onclickAttr.match(/openTabOptnno\s*\(\s*event\s*,\s*['"]([^'"]+)['"]\s*\)/);
+			var firstTabName = match && match[1] ? match[1] : $tabContents.first().attr('id');
+			window.openTabOptnno(null, firstTabName);
+		} else {
+			var activeOnclick = $activeLink.first().attr('onclick') || '';
+			var activeMatch = activeOnclick.match(/openTabOptnno\s*\(\s*event\s*,\s*['"]([^'"]+)['"]\s*\)/);
+			if (activeMatch && activeMatch[1]) {
+				var $target = $('#' + activeMatch[1]);
+				if ($target.length && $target.css('display') === 'none') {
+					$tabContents.hide().css('display', 'none').removeClass('active');
+					$target.show().css('display', 'block').addClass('active');
+				}
+			}
+		}
+	}
+
+	$(document).ready(function() {
+		initOptioninoSkeletonTransition();
+		initOptioninoTabs();
+	});
+
+	$(window).on('load', function() {
+		initOptioninoTabs();
+	});
+
+	setTimeout(initOptioninoTabs, 100);
+	setTimeout(initOptioninoTabs, 350);
+
+	// Event delegation to catch clicks even if user clicks inner title/desc/svg
+	$(document).on('click', '.optionino-section .tab .tablinks', function(e) {
+		var $btn = $(this);
+		var onclickAttr = $btn.attr('onclick') || '';
+		var match = onclickAttr.match(/openTabOptnno\s*\(\s*event\s*,\s*['"]([^'"]+)['"]\s*\)/);
+		if (match && match[1]) {
+			e.preventDefault();
+			window.openTabOptnno(e, match[1]);
+		}
+	});
+
 })(jQuery);

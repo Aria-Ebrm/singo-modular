@@ -22,7 +22,7 @@ class Singo_Shamsi_WooCommerce {
 		add_filter( 'woocommerce_admin_order_date_format', array( $this, 'filter_admin_order_date_format' ), 20, 1 );
 
 		// Only convert admin tables if setting is enabled
-		if ( is_admin() && ! singo_tools_get_option( 'wc_admin_orders', true ) ) {
+		if ( is_admin() && ! singo_tools_get_option( 'wc_admin_orders', false ) ) {
 			// If admin is disabled, remove wc_format_datetime in admin
 			remove_filter( 'wc_format_datetime', array( $this, 'filter_wc_format_datetime' ), 20 );
 		}

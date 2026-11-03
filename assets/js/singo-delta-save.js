@@ -237,7 +237,7 @@
       }
 
       if (!initialSnapshot.has(name)) {
-        return;
+        initialSnapshot.set(name, '');
       }
 
       var currentVal = readFieldValue(name);
@@ -252,6 +252,13 @@
       updateDeltaBadge();
     }
 
+    // Listen to custom field change event (e.g. from media upload modal)
+    document.addEventListener('singo:field-changed', function(e) {
+      if (e.detail && e.detail.name) {
+        evaluateField(e.detail.name);
+      }
+    });
+
     // Listen to custom repeater change event dispatched by product-features-repeater.js
     document.addEventListener('singo:repeater-changed', function(e) {
       if (e.detail && e.detail.repeater) {
@@ -259,7 +266,7 @@
       }
     });
 
-    // Listen to changes across all inputs
+    // Listen to changes across all inputs (Native Capture Phase)
     form.addEventListener('input', function(e) {
       if (e.target && e.target.name) {
         evaluateField(e.target.name, e.target);
@@ -271,6 +278,15 @@
         evaluateField(e.target.name, e.target);
       }
     }, true);
+
+    // Also listen via jQuery to catch programmatic jQuery triggers
+    if (window.jQuery) {
+      window.jQuery(form).on('change input', 'input, select, textarea', function(e) {
+        if (e.target && e.target.name) {
+          evaluateField(e.target.name, e.target);
+        }
+      });
+    }
 
     // Initialize Shortcode Copy Buttons across all shortcode fields (Image 2 design)
     function initShortcodeCopyWidgets() {

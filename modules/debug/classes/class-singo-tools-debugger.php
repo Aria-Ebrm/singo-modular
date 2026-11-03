@@ -58,7 +58,7 @@ class Singo_Tools_Debugger {
 	 * Write log entry.
 	 */
 	public static function log( mixed $message, string $level = 'INFO' ): void {
-		$enabled = singo_tools_get_option( 'enable_system_debug', true );
+		$enabled = singo_tools_get_option( 'enable_system_debug', false );
 		if ( ! $enabled ) {
 			return;
 		}

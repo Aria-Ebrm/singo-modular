@@ -7,25 +7,55 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// Fetch all product categories
-$categories = get_terms( array(
-	'taxonomy'   => 'product_cat',
-	'hide_empty' => false,
-	'orderby'    => 'name',
-	'order'      => 'ASC',
-) );
+// Fetch all product categories with padded counts (cached via transient for fast settings page load)
+$categories = get_transient( 'singo_price_list_admin_cats' );
+if ( false === $categories || ! is_array( $categories ) ) {
+	$raw_categories = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'hide_empty' => false,
+		'pad_counts' => true,
+		'orderby'    => 'name',
+		'order'      => 'ASC',
+	) );
 
-// Resolve Default Site Logo (Only use site custom logo if configured in WordPress customizer)
-$default_logo = '';
-$site_logo_id = get_theme_mod( 'custom_logo' );
-if ( $site_logo_id ) {
-	$default_logo = (string) wp_get_attachment_image_url( (int) $site_logo_id, 'full' );
+	// Organize categories hierarchically so children appear under parents
+	$categories = array();
+	if ( ! empty( $raw_categories ) && ! is_wp_error( $raw_categories ) ) {
+		$visited    = array();
+		$walk_terms = static function ( array $terms, int $parent_id, int $depth, callable $fn, array &$result, array &$visited ): void {
+			if ( $depth > 20 ) {
+				return;
+			}
+			foreach ( $terms as $term ) {
+				$t_id = (int) $term->term_id;
+				if ( isset( $visited[ $t_id ] ) ) {
+					continue;
+				}
+				if ( (int) $term->parent === $parent_id ) {
+					$visited[ $t_id ]    = true;
+					$term->display_depth = $depth;
+					$result[]            = $term;
+					$fn( $terms, $t_id, $depth + 1, $fn, $result, $visited );
+				}
+			}
+		};
+		$walk_terms( $raw_categories, 0, 0, $walk_terms, $categories, $visited );
+
+		// Append any leftover terms if hierarchy is detached
+		if ( count( $categories ) < count( $raw_categories ) ) {
+			$existing_ids = array_map( static fn( $t ) => (int) $t->term_id, $categories );
+			foreach ( $raw_categories as $term ) {
+				if ( ! in_array( (int) $term->term_id, $existing_ids, true ) ) {
+					$term->display_depth = 0;
+					$categories[]        = $term;
+				}
+			}
+		}
+	}
+	set_transient( 'singo_price_list_admin_cats', $categories, DAY_IN_SECONDS );
 }
 
-// Resolve Saved Font URL
-$saved_font_url = (string) get_option( 'singo_price_list_font_url', '' );
-
-// Resolve Saved Primary Brand Color
+// Resolve Saved Primary Brand Color (for table preview pricing display)
 $saved_primary_color = class_exists( 'Singo_Price_List' )
 	? Singo_Price_List::get_active_primary_color()
 	: (string) get_option( 'singo_price_list_primary_color', '#ad6141' );
@@ -36,6 +66,52 @@ if ( empty( $saved_primary_color ) ) {
 $export_nonce = wp_create_nonce( 'singo_export_price_list_nonce' );
 $ajax_nonce   = wp_create_nonce( 'singo_price_list_nonce' );
 ?>
+
+<script>
+(function() {
+	window.openTabOptnno = function(evt, tabName) {
+		var targetId = tabName;
+		if (!targetId) return;
+
+		var tabcontent = document.getElementsByClassName('tabcontent');
+		for (var i = 0; i < tabcontent.length; i++) {
+			tabcontent[i].style.display = 'none';
+			tabcontent[i].classList.remove('active');
+		}
+
+		var tablinks = document.getElementsByClassName('tablinks');
+		for (var j = 0; j < tablinks.length; j++) {
+			tablinks[j].classList.remove('active');
+		}
+
+		var targetEl = document.getElementById(targetId);
+		if (targetEl) {
+			targetEl.style.display = 'block';
+			targetEl.classList.add('active');
+		}
+
+		var activeBtn = (evt && evt.currentTarget) ? evt.currentTarget : document.querySelector('.tablinks[onclick*="' + targetId + '"]');
+		if (activeBtn) {
+			activeBtn.classList.add('active');
+		}
+
+		var saveBoxes = document.getElementsByClassName('optionino-options-save-box');
+		var hideSave = (targetId === 'price_list_export_tab' || targetId === 'price_list_category_colors_tab' || targetId === 'price_list_download_reports_tab');
+		for (var k = 0; k < saveBoxes.length; k++) {
+			saveBoxes[k].style.display = hideSave ? 'none' : '';
+		}
+	};
+
+	var firstTab = document.getElementById('price_list_export_tab');
+	if (firstTab) {
+		firstTab.style.display = 'block';
+	}
+	var links = document.querySelectorAll('.tablinks');
+	if (links.length && !document.querySelector('.tablinks.active')) {
+		links[0].classList.add('active');
+	}
+})();
+</script>
 
 <style>
 /* Singo Price List & Optionino Button Styling */
@@ -106,7 +182,17 @@ $ajax_nonce   = wp_create_nonce( 'singo_price_list_nonce' );
 }
 
 /* Hide Optionino Global Save Changes button when Price List tab is visible */
-form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .optionino-options-save-box {
+@keyframes singoSpin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+.singo-spin {
+	animation: singoSpin 0.8s linear infinite !important;
+}
+form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .optionino-options-save-box,
+form#save-options-optionino:has(#price_list_export_tab:not([style*="display: none"])) .optionino-options-save-box,
+form#save-options-optionino:has(#price_list_category_colors_tab:not([style*="display: none"])) .optionino-options-save-box,
+form#save-options-optionino:has(#price_list_download_reports_tab:not([style*="display: none"])) .optionino-options-save-box {
 	display: none !important;
 }
 </style>
@@ -143,9 +229,11 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 				<select id="singo-price-category" class="optionino-select" style="width: 100%; height: 38px; font-family: inherit; font-size: 13px; border-radius: 6px; border: 1px solid #cbd5e1;">
 					<option value="0">همه دسته‌بندی‌ها (تمامی محصولات فروشگاه)</option>
 					<?php if ( ! empty( $categories ) && ! is_wp_error( $categories ) ) : ?>
-						<?php foreach ( $categories as $cat ) : ?>
+						<?php foreach ( $categories as $cat ) :
+							$depth_prefix = isset( $cat->display_depth ) && (int) $cat->display_depth > 0 ? str_repeat( '— ', (int) $cat->display_depth ) : '';
+						?>
 							<option value="<?php echo esc_attr( (string) $cat->term_id ); ?>">
-								<?php echo esc_html( $cat->name ); ?> (<?php echo esc_html( (string) $cat->count ); ?> کالا)
+								<?php echo esc_html( $depth_prefix . $cat->name ); ?> (<?php echo esc_html( (string) $cat->count ); ?> کالا)
 							</option>
 						<?php endforeach; ?>
 					<?php endif; ?>
@@ -226,13 +314,13 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 
 		</div>
 
-		<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 18px; border-top: 1px dashed #e2e8f0; padding-top: 18px;">
+		<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 18px; border-top: 1px dashed #e2e8f0; padding-top: 18px; align-items: center;">
 			
-			<!-- Field 4: Document Title -->
+			<!-- Field 4: Document Title (Per-Export Quick Override) -->
 			<div>
 				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
 					<label for="singo-price-title" style="font-weight: 700; font-size: 13.5px; color: #334155; margin: 0;">
-						عنوان سربرگ لیست قیمت:
+						عنوان سربرگ این خروجی (اختیاری):
 					</label>
 					<div class="optionino-switch-box" style="transform: scale(0.8); transform-origin: left center;">
 						<input type="checkbox" class="optionino-switch-checkbox singo-section-toggle" id="singo-price-enable-title" data-target="#singo-title-field-wrap" value="1" checked style="display:none;" />
@@ -245,125 +333,27 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 				</div>
 			</div>
 
-			<!-- Field 5: Footer Notes -->
-			<div>
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-					<label for="singo-price-notes" style="font-weight: 700; font-size: 13.5px; color: #334155; margin: 0;">
-						یادداشت و توضیحات پاورقی:
-					</label>
-					<div class="optionino-switch-box" style="transform: scale(0.8); transform-origin: left center;">
-						<input type="checkbox" class="optionino-switch-checkbox singo-section-toggle" id="singo-price-enable-notes" data-target="#singo-notes-field-wrap" value="1" checked style="display:none;" />
-						<label class="optionino-switch-label" for="singo-price-enable-notes" title="نمایش / عدم نمایش توضیحات در پاورقی"></label>
-					</div>
+			<!-- Notice & Quick Jump to Appearance Tab -->
+			<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px;">
+				<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+					<span class="dashicons dashicons-admin-appearance" style="color: #ad6141; font-size: 18px; width: 18px; height: 18px;"></span>
+					<strong style="font-size: 13px; color: #1e293b;">تنظیمات هویت بصری، قالب و فوتر</strong>
 				</div>
-				<div id="singo-notes-field-wrap">
-					<input type="text" id="singo-price-notes" class="optionino-input" value="قیمت‌ها به تومان می‌باشد. جهت استعلام و ثبت سفارش قطعی تماس حاصل فرمایید." style="width: 100%; height: 38px; font-family: inherit; font-size: 13px; border-radius: 6px; border: 1px solid #cbd5e1; padding: 0 12px;" />
-					<p style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;">توضیحات کوتاه در فوتر پایین صفحات نمایش داده می‌شود.</p>
-				</div>
-			</div>
-
-			<!-- Field 6: Logo Chooser -->
-			<div>
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-					<label style="font-weight: 700; font-size: 13.5px; color: #334155; margin: 0;">
-						لوگوی سربرگ (سمت راست):
-					</label>
-					<div class="optionino-switch-box" style="transform: scale(0.8); transform-origin: left center;">
-						<input type="checkbox" class="optionino-switch-checkbox singo-section-toggle" id="singo-price-enable-logo" data-target="#singo-logo-field-wrap" value="1" <?php checked( ! empty( $default_logo ) ); ?> style="display:none;" />
-						<label class="optionino-switch-label" for="singo-price-enable-logo" title="نمایش / عدم نمایش لوگو در سربرگ"></label>
-					</div>
-				</div>
-				<div id="singo-logo-field-wrap" style="<?php echo empty( $default_logo ) ? 'display: none;' : ''; ?>">
-					<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-						<input type="hidden" id="singo-price-logo-url" value="<?php echo esc_url( $default_logo ); ?>" />
-						<div id="singo-logo-preview-box" style="width: 50px; height: 38px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-							<?php if ( ! empty( $default_logo ) ) : ?>
-								<img id="singo-logo-preview-img" src="<?php echo esc_url( $default_logo ); ?>" alt="لوگو" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-							<?php else : ?>
-								<span id="singo-logo-placeholder" style="font-size: 10px; color: #94a3b8;">بدون لوگو</span>
-							<?php endif; ?>
-						</div>
-						<button type="button" id="singo-btn-change-logo" class="singo-btn-secondary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
-							<span class="dashicons dashicons-format-image" style="font-size: 16px; width: 16px; height: 16px; color: #ad6141 !important;"></span>
-							انتخاب لوگو
-						</button>
-						<?php if ( ! empty( $default_logo ) ) : ?>
-							<button type="button" id="singo-btn-reset-logo" class="singo-btn-secondary" data-default="<?php echo esc_url( $default_logo ); ?>" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 10px; border-radius: 6px;">
-								پیش‌فرض
-							</button>
-						<?php endif; ?>
-						<button type="button" id="singo-btn-remove-logo" class="singo-btn-secondary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 10px; border-radius: 6px;" title="حذف لوگوی سربرگ">
-							حذف
-						</button>
-					</div>
-					<p style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;">لوگو در گوشه بالا سمت راست همه صفحات چاپ خواهد شد.</p>
-				</div>
-			</div>
-
-		</div>
-
-		<!-- Field 7: Custom Font Chooser & Direct URL -->
-		<div style="margin-top: 18px; border-top: 1px dashed #e2e8f0; padding-top: 18px;">
-			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-				<label style="font-weight: 700; font-size: 13.5px; color: #334155; margin: 0;">
-					فایل فونت دلخواه قالب PDF (اختیاری):
-				</label>
-				<div class="optionino-switch-box" style="transform: scale(0.8); transform-origin: left center;">
-					<input type="checkbox" class="optionino-switch-checkbox singo-section-toggle" id="singo-price-enable-font" data-target="#singo-font-field-wrap" value="1" <?php checked( ! empty( $saved_font_url ) ); ?> style="display:none;" />
-					<label class="optionino-switch-label" for="singo-price-enable-font" title="فعال / غیرفعال‌سازی فونت سفارشی"></label>
-				</div>
-			</div>
-			<div id="singo-font-field-wrap" style="<?php echo empty( $saved_font_url ) ? 'display: none;' : ''; ?>">
-				<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-					<input type="text" id="singo-price-font-url" class="optionino-input" value="<?php echo esc_attr( $saved_font_url ); ?>" placeholder="آدرس مستقیم فایل فونت در هاست شما (مثلاً https://.../font.woff2) یا دکمه آپلود..." style="flex: 1; min-width: 280px; height: 38px; direction: ltr; text-align: left; font-family: monospace; font-size: 12.5px; border-radius: 6px; border: 1px solid #cbd5e1; padding: 0 12px;" />
-					
-					<button type="button" id="singo-btn-upload-font" class="singo-btn-secondary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
-						<span class="dashicons dashicons-upload" style="font-size: 16px; width: 16px; height: 16px; color: #ad6141 !important;"></span>
-						آپلود / انتخاب فونت
-					</button>
-
-					<button type="button" id="singo-btn-save-font" class="singo-btn-primary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" title="ذخیره آدرس فونت">
-						<span class="dashicons dashicons-saved" style="font-size: 16px; width: 16px; height: 16px; color: #ffffff !important; fill: #ffffff !important;"></span>
-						ذخیره آدرس
-					</button>
-
-					<button type="button" id="singo-btn-reset-font" class="singo-btn-secondary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 12px; border-radius: 6px; white-space: nowrap;" title="پاک کردن آدرس و استفاده از فونت قالب یا پیش‌فرض سایت">
-						پاک کردن
-					</button>
-
-					<span id="singo-font-status" style="font-size: 12.5px; font-weight: 600; display: none;"></span>
-				</div>
-				<p style="margin: 6px 0 0 0; font-size: 12px; color: #64748b;">
-					در صورت تمایل به استفاده از فایل فونت سفارشی، آدرس مستقیم فایل فونت (.woff2 / .woff / .ttf) را در کادر بالا بنویسید یا با کلیک روی «آپلود / انتخاب فونت» آن را انتخاب کنید؛ در غیر این صورت از فونت استاندارد پیش‌فرض سایت استفاده خواهد شد.
+				<p style="margin: 0 0 10px 0; font-size: 12px; color: #64748b; line-height: 1.5;">
+					لوگوی سربرگ، رنگ سازمانی، فونت، کاور A4 سراسری و اطلاعات تماس فوتر از <strong>تب «قالب، کاور و ظاهر کلی PDF»</strong> خوانده می‌شوند.
 				</p>
+				<a href="javascript:void(0);" onclick="var t=document.querySelector('.tablinks[onclick*=\'price_list_contact_tab\']'); if(t){t.click();} else {jQuery('.tablinks').eq(1).click();}" style="font-size: 12.5px; font-weight: 700; color: #ad6141; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+					تنظیمات قالب، کاور و ظاهر PDF &larr;
+				</a>
 			</div>
-		</div>
 
-		<!-- Field 8: Brand / Primary Color Picker -->
-		<div style="margin-top: 18px; border-top: 1px dashed #e2e8f0; padding-top: 18px;">
-			<label for="singo-price-primary-color" style="display: block; font-weight: 700; margin-bottom: 6px; font-size: 13.5px; color: #334155;">
-				رنگ سازمانی و اصلی قالب PDF:
-			</label>
-			<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-				<input type="text" class="optionino-color-selector" id="singo-price-primary-color" name="singo-price-primary-color" value="<?php echo esc_attr( $saved_primary_color ); ?>" placeholder="#ad6141" pattern="^#?[0-9A-Fa-f]{3,8}$" data-default-color="#ad6141" style="height: 38px; width: 110px; font-family: monospace; font-size: 13px; text-align: left; direction: ltr;" />
-
-				<button type="button" id="singo-btn-save-color" class="singo-btn-primary" style="height: 38px; font-size: 13px; font-weight: 600; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;" title="ذخیره رنگ سازمانی در دیتابیس">
-					<span class="dashicons dashicons-saved" style="font-size: 16px; width: 16px; height: 16px; color: #ffffff !important; fill: #ffffff !important;"></span>
-					ذخیره رنگ
-				</button>
-
-				<span id="singo-color-status" style="font-size: 12.5px; font-weight: 600; display: none;"></span>
-			</div>
-			<p style="margin: 6px 0 0 0; font-size: 12px; color: #64748b;">
-				رنگ خطوط سربرگ، عنوان سند، دکمه‌های ابزار و ارقام قیمت محصولات در فایل خروجی PDF با این رنگ تنظیم می‌شود. با زدن دکمه «ذخیره رنگ»، این انتخاب در دیتابیس ماندگار خواهد شد.
-			</p>
 		</div>
 
 		<!-- Action Buttons Row -->
 		<div style="margin-top: 22px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
 			<button type="button" id="singo-btn-trigger-pdf" class="singo-btn-primary" style="height: 38px; padding: 0 20px; font-size: 13.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(173,97,65,0.2);">
-				<span class="dashicons dashicons-download" style="font-size: 18px; width: 18px; height: 18px; color: #ffffff !important; fill: #ffffff !important;"></span>
-				دانلود مستقیم و چاپ PDF
+				<span class="dashicons dashicons-printer" style="font-size: 18px; width: 18px; height: 18px; color: #ffffff !important; fill: #ffffff !important;"></span>
+				ذخیره به عنوان فایل PDF / چاپ
 			</button>
 
 			<button type="button" id="singo-btn-view-template" class="singo-btn-secondary" style="height: 38px; padding: 0 16px; font-size: 13px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
@@ -402,21 +392,23 @@ form#save-options-optionino:has(#price_list_pdf:not([style*="display: none"])) .
 			<table class="widefat striped" style="border: none; width: 100%; border-collapse: collapse; table-layout: fixed;">
 				<colgroup>
 					<col style="width: 5%;">
-					<col style="width: 10%;">
-					<col style="width: 60%;">
-					<col style="width: 25%;">
+					<col style="width: 9%;">
+					<col style="width: 48%;">
+					<col style="width: 15%;">
+					<col style="width: 23%;">
 				</colgroup>
 				<thead>
 					<tr style="background: #f1f5f9;">
 						<th style="width: 5%; text-align: center; font-weight: 700; padding: 12px 4px; border-bottom: 2px solid #e2e8f0;">ردیف</th>
-						<th style="width: 10%; text-align: center; font-weight: 700; padding: 12px 4px; border-bottom: 2px solid #e2e8f0;">عکس</th>
-						<th style="width: 60%; text-align: right; font-weight: 700; padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">اسم محصول</th>
-						<th style="width: 25%; text-align: center; font-weight: 700; padding: 12px 8px; border-bottom: 2px solid #e2e8f0;">قیمت (تومان)</th>
+						<th style="width: 9%; text-align: center; font-weight: 700; padding: 12px 4px; border-bottom: 2px solid #e2e8f0;">عکس</th>
+						<th style="width: 48%; text-align: right; font-weight: 700; padding: 12px 14px; border-bottom: 2px solid #e2e8f0;">اسم محصول</th>
+						<th style="width: 15%; text-align: center; font-weight: 700; padding: 12px 6px; border-bottom: 2px solid #e2e8f0;">برند</th>
+						<th style="width: 23%; text-align: center; font-weight: 700; padding: 12px 8px; border-bottom: 2px solid #e2e8f0;">قیمت (تومان)</th>
 					</tr>
 				</thead>
 				<tbody id="singo-preview-tbody">
 					<tr>
-						<td colspan="4" style="text-align: center; padding: 45px 20px; color: #64748b; background: #fafbfc;">
+						<td colspan="5" style="text-align: center; padding: 45px 20px; color: #64748b; background: #fafbfc;">
 							<div style="max-width: 440px; margin: 0 auto;">
 								<span class="dashicons dashicons-visibility" style="font-size: 32px; width: 32px; height: 32px; color: #ad6141; display: block; margin: 0 auto 10px;"></span>
 								<strong style="font-size: 14px; color: #334155; display: block; margin-bottom: 6px;">پیش‌نمایش جدول هنوز بارگذاری نشده است</strong>
@@ -454,14 +446,7 @@ jQuery(document).ready(function($) {
 		var hideStrike       = $('#singo-price-hide-strike').is(':checked') ? '1' : '0';
 		var expandVariations = $('#singo-price-expand-variations').is(':checked') ? '1' : '0';
 		var showTitle        = $('#singo-price-enable-title').is(':checked') ? '1' : '0';
-		var showNotes        = $('#singo-price-enable-notes').is(':checked') ? '1' : '0';
-		var showLogo         = $('#singo-price-enable-logo').is(':checked') ? '1' : '0';
-		var showFont         = $('#singo-price-enable-font').is(':checked') ? '1' : '0';
 		var title            = showTitle === '1' ? encodeURIComponent($('#singo-price-title').val() || '') : '';
-		var notes            = showNotes === '1' ? encodeURIComponent($('#singo-price-notes').val() || '') : '';
-		var logoUrl          = showLogo === '1' ? encodeURIComponent($('#singo-price-logo-url').val() || '') : '';
-		var fontUrl          = showFont === '1' ? encodeURIComponent($('#singo-price-font-url').val().trim()) : '';
-		var primaryColor     = encodeURIComponent($('#singo-price-primary-color').val().trim() || '#ad6141');
 
 		var url = exportBaseUrl + 
 			'?action=' + exportAction + 
@@ -473,14 +458,7 @@ jQuery(document).ready(function($) {
 			'&hide_strike=' + hideStrike + 
 			'&expand_variations=' + expandVariations + 
 			'&show_title=' + showTitle + 
-			'&show_notes=' + showNotes + 
-			'&show_logo=' + showLogo + 
-			'&show_font=' + showFont + 
-			'&title=' + title + 
-			'&notes=' + notes + 
-			'&logo_url=' + logoUrl + 
-			'&font_url=' + fontUrl + 
-			'&primary_color=' + primaryColor;
+			'&title=' + title;
 
 		if (autoprint) {
 			url += '&autoprint=1';
@@ -495,18 +473,12 @@ jQuery(document).ready(function($) {
 		var target = $input.data('target');
 		if ($input.is(':checked')) {
 			$(target).stop(true, true).slideDown(200);
-			if ($input.attr('id') === 'singo-price-enable-font') {
-				applyDynamicFont($('#singo-price-font-url').val().trim());
-			}
 		} else {
 			$(target).stop(true, true).slideUp(200);
-			if ($input.attr('id') === 'singo-price-enable-font') {
-				applyDynamicFont('');
-			}
 		}
 	});
 
-	// Trigger Direct Print / Save as PDF
+	// Trigger Print / Save as PDF in New Tab
 	$('#singo-btn-trigger-pdf').on('click', function(e) {
 		e.preventDefault();
 		var targetUrl = buildExportUrl(true);
@@ -520,195 +492,11 @@ jQuery(document).ready(function($) {
 		window.open(targetUrl, '_blank');
 	});
 
-	// Logo Media Selector
-	$('#singo-btn-change-logo').on('click', function(e) {
-		e.preventDefault();
-		if (typeof wp === 'undefined' || !wp.media) {
-			alert('کتابخانه چندرسانه‌ای وردپرس در دسترس نیست.');
-			return;
-		}
-
-		var frame = wp.media({
-			title: 'انتخاب یا آپلود لوگوی سربرگ لیست قیمت',
-			button: { text: 'استفاده به عنوان لوگوی سربرگ' },
-			multiple: false
-		});
-
-		frame.on('select', function() {
-			var attachment = frame.state().get('selection').first().toJSON();
-			if (attachment && attachment.url) {
-				$('#singo-price-logo-url').val(attachment.url);
-				$('#singo-logo-preview-box').html('<img id="singo-logo-preview-img" src="' + attachment.url + '" alt="لوگو" style="max-width: 100%; max-height: 100%; object-fit: contain;" />');
-			}
-		});
-
-		frame.open();
-	});
-
-	// Reset Logo to Site Default
-	$('#singo-btn-reset-logo').on('click', function(e) {
-		e.preventDefault();
-		var defaultLogo = $(this).data('default') || '';
-		$('#singo-price-logo-url').val(defaultLogo);
-		if (defaultLogo) {
-			$('#singo-logo-preview-box').html('<img id="singo-logo-preview-img" src="' + defaultLogo + '" alt="لوگو" style="max-width: 100%; max-height: 100%; object-fit: contain;" />');
-		} else {
-			$('#singo-logo-preview-box').html('<span id="singo-logo-placeholder" style="font-size: 10px; color: #94a3b8;">بدون لوگو</span>');
-		}
-	});
-
-	// Remove Logo Button
-	$('#singo-btn-remove-logo').on('click', function(e) {
-		e.preventDefault();
-		$('#singo-price-logo-url').val('');
-		$('#singo-logo-preview-box').html('<span id="singo-logo-placeholder" style="font-size: 10px; color: #94a3b8;">بدون لوگو</span>');
-	});
-
-	// Font Media Selector (Upload / Choose Font from Media Library)
-	$('#singo-btn-upload-font').on('click', function(e) {
-		e.preventDefault();
-		if (typeof wp === 'undefined' || !wp.media) {
-			alert('کتابخانه چندرسانه‌ای وردپرس در دسترس نیست.');
-			return;
-		}
-
-		var fontFrame = wp.media({
-			title: 'انتخاب یا آپلود فایل فونت (WOFF2, WOFF, TTF, OTF)',
-			button: { text: 'استفاده از این فایل فونت' },
-			multiple: false
-		});
-
-		fontFrame.on('select', function() {
-			var attachment = fontFrame.state().get('selection').first().toJSON();
-			if (attachment && attachment.url) {
-				$('#singo-price-font-url').val(attachment.url);
-				saveFontSetting(attachment.url);
-				applyDynamicFont(attachment.url);
-			}
-		});
-
-		fontFrame.open();
-	});
-
-	// Save Font Setting via AJAX
-	function saveFontSetting(url) {
-		var $status = $('#singo-font-status');
-		$status.stop().css({ color: '#ad6141', display: 'inline-block' }).text('در حال ذخیره...');
-
-		$.ajax({
-			url: ajaxUrl,
-			type: 'POST',
-			data: {
-				action: 'singo_save_price_list_font_url',
-				security: ajaxNonce,
-				font_url: url
-			},
-			success: function(res) {
-				if (res.success) {
-					$status.css('color', '#16a34a').text('✓ آدرس فونت ذخیره شد');
-					setTimeout(function() {
-						$status.fadeOut(400);
-					}, 3000);
-				} else {
-					$status.css('color', '#dc2626').text('خطا در ذخیره');
-				}
-			},
-			error: function() {
-				$status.css('color', '#dc2626').text('خطا در برقراری ارتباط');
-			}
-		});
-	}
-
-	// Manual Save Font Button
-	$('#singo-btn-save-font').on('click', function(e) {
-		e.preventDefault();
-		var url = $('#singo-price-font-url').val().trim();
-		saveFontSetting(url);
-		applyDynamicFont(url);
-	});
-
-	// Reset / Clear Font URL
-	$('#singo-btn-reset-font').on('click', function(e) {
-		e.preventDefault();
-		$('#singo-price-font-url').val('');
-		saveFontSetting('');
-		applyDynamicFont('');
-	});
-
-	// Dynamic Font Preview Application
-	function applyDynamicFont(url) {
-		$('#singo-dynamic-preview-font-style').remove();
-		if (!url) return;
-
-		var ext = url.split('.').pop().split(/[?#]/)[0].toLowerCase();
-		var format = "format('woff2')";
-		if (ext === 'woff') format = "format('woff')";
-		else if (ext === 'ttf') format = "format('truetype')";
-		else if (ext === 'otf') format = "format('opentype')";
-
-		var css = "@font-face { font-family: 'SingoDynamicPreviewFont'; src: url('" + url + "') " + format + "; font-weight: 100 900; font-style: normal; font-display: swap; } " +
-				  ".singo-price-list-admin-wrap table, .singo-price-list-admin-wrap table *, .singo-price-list-admin-wrap h3, .singo-price-list-admin-wrap h4, .singo-price-list-admin-wrap strong { font-family: 'SingoDynamicPreviewFont', inherit !important; }";
-		$('<style id="singo-dynamic-preview-font-style">' + css + '</style>').appendTo('head');
-	}
-
-	// Dynamic preview update when URL typed or modified
-	$('#singo-price-font-url').on('input change', function() {
-		applyDynamicFont($(this).val().trim());
-	});
-
-	// Initial apply
-	applyDynamicFont($('#singo-price-font-url').val().trim());
-
-	// Save Primary Brand Color Setting via AJAX
-	function savePrimaryColorSetting(color) {
-		var $status = $('#singo-color-status');
-		$status.stop().css({ color: '#ad6141', display: 'inline-block' }).text('در حال ذخیره...');
-
-		$.ajax({
-			url: ajaxUrl,
-			type: 'POST',
-			data: {
-				action: 'singo_save_price_list_primary_color',
-				security: ajaxNonce,
-				primary_color: color
-			},
-			success: function(res) {
-				if (res.success) {
-					$status.css('color', '#16a34a').text('✓ رنگ سازمانی ذخیره شد');
-					setTimeout(function() {
-						$status.fadeOut(400);
-					}, 3000);
-				} else {
-					$status.css('color', '#dc2626').text('خطا در ذخیره');
-				}
-			},
-			error: function() {
-				$status.css('color', '#dc2626').text('خطا در برقراری ارتباط');
-			}
-		});
-	}
-
-	// Helper: Apply selected brand color to preview table price cells
+	// Helper: Apply brand color to preview table price cells
 	function applyPreviewPriceColor(color) {
 		$('.singo-preview-price-cell, .singo-preview-price-cell .singo-price-sale').css('color', color);
 		$('.singo-preview-price-cell .singo-price-regular, .singo-preview-price-cell del').css('color', '#94a3b8');
 	}
-
-	// Manual Save Primary Color Button
-	$('#singo-btn-save-color').on('click', function(e) {
-		e.preventDefault();
-		var color = $('#singo-price-primary-color').val().trim() || '#ad6141';
-		savePrimaryColorSetting(color);
-		applyPreviewPriceColor(color);
-	});
-
-	// Dynamic live color update on input/change
-	$('#singo-price-primary-color').on('input change', function() {
-		var val = $(this).val().trim();
-		if (val) {
-			applyPreviewPriceColor(val);
-		}
-	});
 
 	// Flag to track whether preview was requested by user
 	var isPreviewLoaded = false;
@@ -726,7 +514,7 @@ jQuery(document).ready(function($) {
 			previewXhr.abort();
 		}
 
-		$tbody.html('<tr><td colspan="4" style="text-align:center; padding:35px; color:#64748b;"><span class="dashicons dashicons-update" style="animation: rotation 1.5s infinite linear; font-size:20px; width:20px; height:20px; display:inline-block; vertical-align:middle; margin-left:6px;"></span> در حال بارگذاری پیش‌نمایش (حداکثر ۳۰ قلم)...</td></tr>');
+		$tbody.html('<tr><td colspan="5" style="text-align:center; padding:35px; color:#64748b;"><span class="dashicons dashicons-update" style="animation: rotation 1.5s infinite linear; font-size:20px; width:20px; height:20px; display:inline-block; vertical-align:middle; margin-left:6px;"></span> در حال بارگذاری پیش‌نمایش (حداکثر ۳۰ قلم)...</td></tr>');
 		$count.text('در حال دریافت...');
 		$refreshBtn.prop('disabled', true);
 		$loadBtn.prop('disabled', true);
@@ -751,16 +539,17 @@ jQuery(document).ready(function($) {
 				if (res.success && res.data) {
 					isPreviewLoaded = true;
 					$tbody.html(res.data.table_html);
-					var countLabel = res.data.is_capped ? (res.data.count_fa + ' کالا (نمونه ۳۰تایی)') : (res.data.count_fa + ' کالا');
+					var countDisplay = res.data.total_count_fa || res.data.count_fa;
+					var countLabel = res.data.is_capped ? (countDisplay + ' کالا (نمونه ۳۰ تایی)') : (countDisplay + ' کالا');
 					$count.text(countLabel);
 
 					$refreshBtn.css('display', 'inline-flex');
 					$loadBtn.html('<span class="dashicons dashicons-yes"></span> پیش‌نمایش فعال شد').removeClass('singo-btn-primary').addClass('singo-btn-secondary');
 
-					var currentColor = $('#singo-price-primary-color').val().trim() || '#ad6141';
+					var currentColor = '<?php echo esc_js( $saved_primary_color ); ?>';
 					applyPreviewPriceColor(currentColor);
 				} else {
-					$tbody.html('<tr><td colspan="4" style="text-align:center; padding:30px; color:#ef4444;">خطا در دریافت اطلاعات محصولات.</td></tr>');
+					$tbody.html('<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">خطا در دریافت اطلاعات محصولات.</td></tr>');
 					$count.text('۰ کالا');
 				}
 			},
@@ -771,7 +560,7 @@ jQuery(document).ready(function($) {
 				if (status === 'abort') {
 					return;
 				}
-				$tbody.html('<tr><td colspan="4" style="text-align:center; padding:30px; color:#ef4444;">خطا در برقراری ارتباط با سرور.</td></tr>');
+				$tbody.html('<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">خطا در برقراری ارتباط با سرور.</td></tr>');
 				$count.text('۰ کالا');
 			}
 		});
@@ -790,11 +579,10 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	// Synchronize Optionino Global Save Changes Button (Hide exclusively on Price List PDF tab)
+	// Synchronize Optionino Global Save Changes Button (Hide on Custom Action tabs)
 	function syncSaveButtonVisibility() {
-		var $tab = $('#price_list_pdf');
-		var isPriceListTab = $tab.length && $tab.is(':visible') && $tab.css('display') !== 'none';
-		if (isPriceListTab) {
+		var isCustomTab = $('#price_list_export_tab:visible, #price_list_category_colors_tab:visible, #price_list_download_reports_tab:visible').length > 0;
+		if (isCustomTab) {
 			$('.optionino-options-save-box').stop(true, true).hide();
 		} else {
 			$('.optionino-options-save-box').stop(true, true).show();

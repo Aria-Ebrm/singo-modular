@@ -31,7 +31,7 @@ class Singo_Shamsi_Core {
 
 	private function load_hooks() {
 		// Master switch check for Shamsi Date
-		if ( ! singo_tools_get_option( 'master_switch', true ) ) {
+		if ( ! singo_tools_get_option( 'master_switch', false ) ) {
 			return;
 		}
 
@@ -49,25 +49,25 @@ class Singo_Shamsi_Core {
 		}
 
 		// Load Frontend Module
-		if ( ! is_admin() && singo_tools_get_option( 'enable_frontend', true ) ) {
+		if ( ! is_admin() && singo_tools_get_option( 'enable_frontend', false ) ) {
 			require_once __DIR__ . '/class-singo-shamsi-frontend.php';
 			new Singo_Shamsi_Frontend();
 		}
 
 		// Load Admin Module
-		if ( is_admin() && ! wp_doing_ajax() && singo_tools_get_option( 'enable_admin', true ) ) {
+		if ( is_admin() && ! wp_doing_ajax() && singo_tools_get_option( 'enable_admin', false ) ) {
 			require_once __DIR__ . '/class-singo-shamsi-admin.php';
 			new Singo_Shamsi_Admin();
 		}
 
 		// Load WooCommerce Module
-		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_woocommerce', true ) ) {
+		if ( class_exists( 'WooCommerce' ) && singo_tools_get_option( 'enable_woocommerce', false ) ) {
 			require_once __DIR__ . '/class-singo-shamsi-woocommerce.php';
 			new Singo_Shamsi_WooCommerce();
 		}
 
 		// Load Elementor Module
-		if ( ( did_action( 'elementor/loaded' ) || class_exists( '\Elementor\Plugin' ) ) && singo_tools_get_option( 'enable_elementor', true ) ) {
+		if ( ( did_action( 'elementor/loaded' ) || class_exists( '\Elementor\Plugin' ) ) && singo_tools_get_option( 'enable_elementor', false ) ) {
 			require_once __DIR__ . '/class-singo-shamsi-elementor.php';
 			new Singo_Shamsi_Elementor();
 		}

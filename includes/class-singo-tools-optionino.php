@@ -22,6 +22,8 @@ class Singo_Tools_Optionino {
 		self::set_tabs();
 
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles' ) );
+		add_action( 'admin_head', array( __CLASS__, 'render_critical_skeleton_styles' ) );
+		add_action( 'optionino_before_setting_singo_tools_options', array( __CLASS__, 'render_skeleton_markup' ) );
 	}
 
 	/**
@@ -200,7 +202,7 @@ class Singo_Tools_Optionino {
 					}
 
 					var frame = wp.media({
-						title: 'انتخاب یا آپلود تصویر لوگو',
+						title: 'انتخاب یا بارگذاری تصویر',
 						button: { text: 'استفاده از این تصویر' },
 						multiple: false
 					});
@@ -208,14 +210,36 @@ class Singo_Tools_Optionino {
 					frame.on('select', function() {
 						var attachment = frame.state().get('selection').first().toJSON();
 						var url = attachment.url;
+						var inputEl = document.getElementById(fieldId);
+						if (inputEl) {
+							inputEl.value = url;
+							inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+							inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+						}
 						$('#' + fieldId).val(url).trigger('change');
 						var \$preview = $('#' + fieldId + '-preview');
 						if (\$preview.length) {
 							\$preview.attr('src', url).show();
 						}
+						document.dispatchEvent(new CustomEvent('singo:field-changed', {
+							detail: { name: fieldId, value: url }
+						}));
 					});
 
 					frame.open();
+				});
+
+				$(document).on('input change', '.optionino-box-image-field input.image-url', function() {
+					var val = $(this).val();
+					var id = $(this).attr('id');
+					var \$preview = $('#' + id + '-preview');
+					if (\$preview.length) {
+						if (val) {
+							\$preview.attr('src', val).show();
+						} else {
+							\$preview.attr('src', '').hide();
+						}
+					}
 				});
 			});
 		";
@@ -238,6 +262,46 @@ class Singo_Tools_Optionino {
 			}
 			.optionino-section {
 				min-height: calc(100vh - 180px) !important;
+			}
+			@media (min-width: 783px) {
+				.optionino-section {
+					display: flex !important;
+					flex-wrap: nowrap !important;
+					align-items: flex-start !important;
+					box-sizing: border-box !important;
+					width: 100% !important;
+				}
+				.optionino-section .tab {
+					width: 30% !important;
+					flex: 0 0 30% !important;
+					max-width: 30% !important;
+					box-sizing: border-box !important;
+				}
+				.optionino-section .optionino-tab-content-outer {
+					flex: 1 1 0% !important;
+					min-width: 0 !important;
+					max-width: 70% !important;
+					box-sizing: border-box !important;
+					overflow: hidden !important;
+				}
+				.optionino-section .tabcontent {
+					box-sizing: border-box !important;
+					width: 100% !important;
+					max-width: 100% !important;
+					min-width: 0 !important;
+				}
+			}
+			@media (max-width: 782px) {
+				.optionino-section {
+					flex-wrap: wrap !important;
+				}
+				.optionino-section .tab,
+				.optionino-section .optionino-tab-content-outer {
+					width: 100% !important;
+					flex: 0 0 100% !important;
+					max-width: 100% !important;
+					box-sizing: border-box !important;
+				}
 			}
 			.optionino-section .tab-information > img {
 				height: 150px !important;
@@ -522,8 +586,196 @@ class Singo_Tools_Optionino {
 			OPTNNO::set_tab( 'singo_tools_options', $item['tab'] );
 		}
 	}
-}
 
-if ( ! class_exists( 'SDM_Optionino' ) ) {
-	class_alias( 'Singo_Tools_Optionino', 'SDM_Optionino' );
+	/**
+	 * Output critical inline CSS in admin_head for instant skeleton paint on Singo Tools settings page.
+	 */
+	public static function render_critical_skeleton_styles(): void {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'toplevel_page_singo-tools' !== $screen->id ) {
+			return;
+		}
+		?>
+		<style id="singo-critical-skeleton-css">
+			#singo-optionino-skeleton + .optionino-section {
+				display: none !important;
+			}
+			#singo-optionino-skeleton {
+				display: flex !important;
+				background-color: #ffffff !important;
+				box-shadow: 0 0 11px -2px rgba(54, 69, 79, 0.14) !important;
+				border-radius: 25px !important;
+				padding: 3% !important;
+				margin-top: 20px !important;
+				direction: rtl !important;
+				width: 100% !important;
+				min-height: 600px !important;
+				box-sizing: border-box !important;
+				position: relative !important;
+				transition: opacity 0.22s ease-in-out !important;
+			}
+			#singo-optionino-skeleton * {
+				box-sizing: border-box !important;
+			}
+			@keyframes singoSkeletonShimmer {
+				0% { background-position: 200% 0; }
+				100% { background-position: -200% 0; }
+			}
+			.singo-skeleton-shimmer {
+				background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%) !important;
+				background-size: 200% 100% !important;
+				animation: singoSkeletonShimmer 1.5s infinite ease-in-out !important;
+				border-radius: 6px !important;
+			}
+		</style>
+		<?php
+	}
+
+	/**
+	 * Render pixel-perfect skeleton placeholder mockup before Optionino section.
+	 */
+	public static function render_skeleton_markup(): void {
+		?>
+		<div id="singo-optionino-skeleton" class="singo-skeleton-container rtl" aria-hidden="true">
+			<!-- Optionino Sidebar (Tabs) -->
+			<div class="singo-skeleton-sidebar">
+				<!-- Centered Logo Block matching Optionino tab-information -->
+				<div class="singo-skeleton-tab-info">
+					<div class="singo-skeleton-shimmer singo-skeleton-logo"></div>
+					<div class="singo-skeleton-shimmer singo-skeleton-version"></div>
+				</div>
+
+				<!-- Tab links (6 tabs matching live settings) -->
+				<div class="singo-skeleton-tabs-list">
+					<!-- Tab 1: تاریخ شمسی (Active) -->
+					<div class="singo-skeleton-tab-item active">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 135px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 175px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+
+					<!-- Tab 2: تقویم فارسی جت -->
+					<div class="singo-skeleton-tab-item">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 145px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 160px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+
+					<!-- Tab 3: دستیار ارزی -->
+					<div class="singo-skeleton-tab-item">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 125px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 180px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+
+					<!-- Tab 4: گروه‌بندی ویژگی‌ها -->
+					<div class="singo-skeleton-tab-item">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 130px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 170px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+
+					<!-- Tab 5: لیست قیمت PDF -->
+					<div class="singo-skeleton-tab-item">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 140px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 150px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+
+					<!-- Tab 6: سایر امکانات -->
+					<div class="singo-skeleton-tab-item">
+						<div class="singo-skeleton-tab-texts">
+							<div class="singo-skeleton-shimmer singo-skeleton-title" style="width: 95px;"></div>
+							<div class="singo-skeleton-shimmer singo-skeleton-desc" style="width: 165px;"></div>
+						</div>
+						<div class="singo-skeleton-shimmer singo-skeleton-icon"></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Optionino Main Content Area -->
+			<div class="singo-skeleton-content-outer">
+				<div class="singo-skeleton-tabcontent">
+					<!-- Field 1: فعال‌سازی تاریخ شمسی (Title + Switcher + Desc) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 190px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-subtext" style="width: 390px;"></div>
+					</div>
+
+					<!-- Field 2: بخش کاربری (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 230px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 3: پیشخوان (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 200px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 4: اعداد انگلیسی به فارسی (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 180px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 5: فرمت پیش‌فرض تاریخ (Title + Select Dropdown) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 140px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-select"></div>
+					</div>
+
+					<!-- Field 6: REST API (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 250px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 7: ووکامرس (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 220px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 8: ایمیل‌های ووکامرس (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 240px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 9: جدول سفارشات (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 260px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 10: المنتور (Title + Switcher) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 210px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+					</div>
+
+					<!-- Field 11: فرم المنتور Datepicker (Title + Switcher + Desc) -->
+					<div class="singo-skeleton-field">
+						<div class="singo-skeleton-shimmer singo-skeleton-label" style="width: 270px;"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-switch"></div>
+						<div class="singo-skeleton-shimmer singo-skeleton-subtext" style="width: 440px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
 }

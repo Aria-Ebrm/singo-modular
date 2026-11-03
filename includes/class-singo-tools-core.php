@@ -73,7 +73,7 @@ class Singo_Tools_Core {
 	 * Initialize WordPress hooks.
 	 */
 	private function init_hooks(): void {
-		add_action( 'init', array( $this, 'load_modules' ) );
+		add_action( 'init', array( $this, 'load_modules' ), 5 );
 		add_action( 'admin_notices', array( $this, 'check_plugin_conflicts' ) );
 		add_action( 'update_option_singo_tools_options', array( $this, 'purge_cache_on_save' ), 10, 2 );
 		add_action( 'update_option_sdm_options', array( $this, 'purge_cache_on_save' ), 10, 2 );
@@ -246,9 +246,10 @@ class Singo_Tools_Core {
 	public function filter_user_capabilities( array $allcaps, array $caps, array $args, WP_User $user ): array {
 		$requested_cap = $args[0] ?? '';
 
-		// If user is Administrator (has manage_options), always grant manage_woocommerce for Singo Tools menus
-		if ( ! empty( $allcaps['manage_options'] ) ) {
+		// If user is Administrator (has manage_options or administrator role), always grant manage_woocommerce and manage_options
+		if ( ! empty( $allcaps['manage_options'] ) || ! empty( $allcaps['administrator'] ) || ( $user->exists() && in_array( 'administrator', (array) $user->roles, true ) ) ) {
 			$allcaps['manage_woocommerce'] = true;
+			$allcaps['manage_options']     = true;
 		}
 
 		// Check if user is shop manager or has manage_woocommerce capability
@@ -275,7 +276,7 @@ class Singo_Tools_Core {
 		// 1. Admin GET page request
 		if ( isset( $_GET['page'] ) && is_string( $_GET['page'] ) ) {
 			$page = sanitize_key( $_GET['page'] );
-			if ( in_array( $page, array( 'singo-tools', 'singo-tools-debug' ), true ) ) {
+			if ( in_array( $page, array( 'singo-tools', 'singo-tools-debug', 'singo-price-list' ), true ) ) {
 				return true;
 			}
 		}
@@ -287,7 +288,7 @@ class Singo_Tools_Core {
 			// Optionino AJAX settings save for singo_tools_options
 			if ( 'save_optionino_data' === $action ) {
 				$dev_name = isset( $_POST['dev_name'] ) ? sanitize_key( (string) $_POST['dev_name'] ) : '';
-				if ( 'singo_tools_options' === $dev_name ) {
+				if ( in_array( $dev_name, array( 'singo_tools_options', 'singo_price_list_options' ), true ) ) {
 					return true;
 				}
 			}

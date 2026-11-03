@@ -22,9 +22,12 @@ singo-debug.log
 
 # ------------------------------------------------------------------------------
 # GitHub Markdown Policy:
-# ONLY README.md is published/committed to GitHub.
-# Internal AI rules (AGENTS.md, GEMINI.md, PROJECT_RULES.md, etc.) are kept locally only.
+# ONLY README.md and MODULE_RULES.md are published/committed to GitHub.
+# Internal AI rules (AGENTS.md, GEMINI.md, PROJECT_RULES.md, Knowledge/, etc.) are kept locally only.
 # ------------------------------------------------------------------------------
 /*.md
 !/README.md
 !/MODULE_RULES.md
+
+# Internal AI Knowledge Base
+/Knowledge/

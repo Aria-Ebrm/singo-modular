@@ -33,7 +33,7 @@ class ShamsiDateModule extends AbstractModule {
 	}
 
 	public static function is_enabled(): bool {
-		return (bool) singo_tools_get_option( 'master_switch', true );
+		return (bool) singo_tools_get_option( 'master_switch', false );
 	}
 
 	public static function is_context_valid(): bool {
@@ -47,13 +47,13 @@ class ShamsiDateModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'فعال‌سازی تبدیل تاریخ شمسی',
 				'desc'    => 'با خاموش کردن این گزینه، تمام قابلیت‌های تبدیل تاریخ غیرفعال شده و تاریخ‌ها به میلادی برمی‌گردند.',
-				'default' => true,
+				'default' => false,
 			),
 			array(
 				'id'      => 'enable_frontend',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل تاریخ در بخش کاربری (فرانت‌اند)',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 				),
@@ -62,7 +62,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'enable_admin',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل تاریخ در پیشخوان (ادمین)',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 				),
@@ -71,7 +71,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'convert_digits',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل اعداد انگلیسی به فارسی',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 				),
@@ -107,7 +107,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'enable_woocommerce',
 				'type'    => 'switcher',
 				'title'   => 'فعال‌سازی تبدیل تاریخ در ووکامرس',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 				),
@@ -116,7 +116,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'wc_order_emails',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل تاریخ در ایمیل‌های سفارش ووکامرس',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 					array( 'enable_woocommerce', '==', true ),
@@ -126,7 +126,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'wc_admin_orders',
 				'type'    => 'switcher',
 				'title'   => 'تبدیل تاریخ در جدول سفارشات (پیشخوان ووکامرس)',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 					array( 'enable_woocommerce', '==', true ),
@@ -139,7 +139,7 @@ class ShamsiDateModule extends AbstractModule {
 				'id'      => 'enable_elementor',
 				'type'    => 'switcher',
 				'title'   => 'فعال‌سازی تبدیل تاریخ در المنتور',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 				),
@@ -149,7 +149,7 @@ class ShamsiDateModule extends AbstractModule {
 				'type'    => 'switcher',
 				'title'   => 'فیلد تاریخ شمسی در فرم‌های المنتور (Datepicker)',
 				'desc'    => 'افزودن فیلد تقویم شمسی به ابزارک فرم المنتور پرو همراه با پنجره بازشو جهت انتخاب تاریخ توسط کاربران.',
-				'default' => true,
+				'default' => false,
 				'require' => array(
 					array( 'master_switch', '==', true ),
 					array( 'enable_elementor', '==', true ),

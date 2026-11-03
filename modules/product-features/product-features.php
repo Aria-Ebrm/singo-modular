@@ -122,7 +122,7 @@ function mu_get_default_attribute_group(): string {
  */
 add_filter( 'singo_group_product_attributes', 'mu_group_product_attributes', 10, 2 );
 function mu_group_product_attributes( $product_attributes, $product ) {
-	$enabled = singo_tools_get_option( 'enable_product_features', true );
+	$enabled = singo_tools_get_option( 'enable_product_features', false );
 	if ( ! $enabled ) {
 		return $product_attributes;
 	}
@@ -177,7 +177,7 @@ function mu_group_product_attributes( $product_attributes, $product ) {
  */
 add_shortcode( 'dynamic_product_specs', 'mu_render_dynamic_product_specs_shortcode' );
 function mu_render_dynamic_product_specs_shortcode( $atts = array() ) {
-	$enabled = singo_tools_get_option( 'enable_product_features', true );
+	$enabled = singo_tools_get_option( 'enable_product_features', false );
 	if ( ! $enabled ) {
 		return '';
 	}
@@ -287,7 +287,7 @@ function mu_render_dynamic_product_specs_shortcode( $atts = array() ) {
  */
 add_filter( 'woocommerce_product_tabs', 'mu_override_woocommerce_attributes_tab', 98 );
 function mu_override_woocommerce_attributes_tab( $tabs ) {
-	$enabled = singo_tools_get_option( 'enable_product_features', true );
+	$enabled = singo_tools_get_option( 'enable_product_features', false );
 	if ( ! $enabled ) {
 		return $tabs;
 	}

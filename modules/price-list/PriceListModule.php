@@ -6,7 +6,7 @@ namespace SingoTools\Modules\PriceList;
 use SingoTools\Core\AbstractModule;
 
 /**
- * Singo Tools - Price List PDF Module (Self-Contained)
+ * Singo Tools - Price List PDF Module (Self-Contained Submenu)
  *
  * @package SingoTools\Modules\PriceList
  * @since 4.1.0
@@ -32,31 +32,20 @@ class PriceListModule extends AbstractModule {
 		return 50;
 	}
 
+	public static function get_placement(): string {
+		return 'none';
+	}
+
 	public static function is_enabled(): bool {
 		return true;
 	}
 
 	public static function is_context_valid(): bool {
-		return class_exists( 'WooCommerce' ) && ( is_admin() || wp_doing_ajax() );
+		return true;
 	}
 
 	public function get_optionino_tab(): ?array {
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			return null;
-		}
-
-		$view = $this->get_path( 'views/admin-price-list-view.php' );
-		if ( ! file_exists( $view ) ) {
-			return null;
-		}
-
-		return array(
-			'id'    => 'price_list_pdf',
-			'title' => self::get_name(),
-			'desc'  => 'تولید  قیمت محصولات ووکامرس بصورت PDF.',
-			'icon'  => self::get_icon(),
-			'file'  => $view,
-		);
+		return null;
 	}
 
 	public function init(): void {

@@ -56,7 +56,7 @@ class Singo_Product_Features {
 			add_action( 'update_option_singo_tools_options', array( $this, 'purge_cache_on_save' ) );
 		}
 
-		$enabled = singo_tools_get_option( 'enable_product_features', true );
+		$enabled = singo_tools_get_option( 'enable_product_features', false );
 		if ( ! $enabled ) {
 			return;
 		}
@@ -239,7 +239,7 @@ class Singo_Product_Features {
 	 * Output select field on Add Attribute page.
 	 */
 	public function add_attribute_group_field(): void {
-		if ( ! singo_tools_get_option( 'enable_product_features', true ) ) {
+		if ( ! singo_tools_get_option( 'enable_product_features', false ) ) {
 			return;
 		}
 
@@ -264,7 +264,7 @@ class Singo_Product_Features {
 	 * Output select field on Edit Attribute page.
 	 */
 	public function edit_attribute_group_field(): void {
-		if ( ! singo_tools_get_option( 'enable_product_features', true ) ) {
+		if ( ! singo_tools_get_option( 'enable_product_features', false ) ) {
 			return;
 		}
 
@@ -345,7 +345,7 @@ class Singo_Product_Features {
 	 * JS Fallback if WooCommerce hooks are missing due to template overrides.
 	 */
 	public function admin_footer_js_fallback(): void {
-		if ( ! singo_tools_get_option( 'enable_product_features', true ) ) {
+		if ( ! singo_tools_get_option( 'enable_product_features', false ) ) {
 			return;
 		}
 

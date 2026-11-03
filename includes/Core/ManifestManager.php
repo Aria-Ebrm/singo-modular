@@ -46,6 +46,12 @@ class ManifestManager {
 		if ( ! $force_refresh ) {
 			$saved = get_option( self::OPTION_KEY, null );
 			if ( is_array( $saved ) && ! empty( $saved ) ) {
+				// Self-healing check: if price-list module exists on disk but is absent from cached manifest, rebuild immediately
+				if ( ! isset( $saved['price-list'] ) && file_exists( SINGO_TOOLS_PATH . 'modules/price-list/PriceListModule.php' ) ) {
+					self::$cached_manifest = self::rebuild_manifest();
+					return self::$cached_manifest;
+				}
+
 				self::$cached_manifest = $saved;
 				return self::$cached_manifest;
 			}

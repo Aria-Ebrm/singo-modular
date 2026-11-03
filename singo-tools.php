@@ -5,22 +5,21 @@ declare(strict_types=1);
 Plugin Name: Singo Tools (جعبه ابزار سینگو)
 Plugin URI: https://singo.studio
 Description: جعبه ابزار جامع و یکپارچه برای مدیریت بهینه فروشگاه ووکامرس.
-Version: 4.2.1
-Requires at least: 6.7
-Requires PHP: 8.0
-Author: Singo Studio
-Author URI: https://singo.studio
-Text Domain: singo-tools
-Domain Path: /languages
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
-*/
+ * Version: 4.5.9
+ * Requires at least: 6.7
+ * Requires PHP: 8.0
+ * Author: Singo Studio
+ * Author URI: https://singo.studio
+ * Text Domain: singo-tools
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
 define( 'SINGO_TOOLS_FILE', __FILE__ );
-define( 'SINGO_TOOLS_VERSION', '4.2.1' );
+define( 'SINGO_TOOLS_VERSION', '4.5.9' );
 define( 'SINGO_TOOLS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SINGO_TOOLS_URL', plugin_dir_url( __FILE__ ) );
 

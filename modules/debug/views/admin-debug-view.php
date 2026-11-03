@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$debug_enabled = singo_tools_get_option( 'enable_system_debug', true );
+$debug_enabled = singo_tools_get_option( 'enable_system_debug', false );
 $debug_enabled = filter_var( $debug_enabled, FILTER_VALIDATE_BOOLEAN );
 $admin_email   = (string) get_option( 'admin_email' );
 
