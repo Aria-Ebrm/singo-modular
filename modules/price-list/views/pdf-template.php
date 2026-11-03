@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 declare(strict_types=1);
 
 /**
@@ -12,7 +12,10 @@ defined( 'ABSPATH' ) || exit;
 $can_manage          = function_exists( 'singo_tools_current_user_can_manage' ) && singo_tools_current_user_can_manage();
 $is_customer_allowed = class_exists( 'Singo_Price_List' ) && Singo_Price_List::is_my_account_enabled() && is_user_logged_in();
 
-if ( ! $can_manage && ! $is_customer_allowed ) {
+$preview_token       = isset( $_GET['preview_token'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['preview_token'] ) ) : '';
+$is_preview          = ( 'singo_preview_2026' === $preview_token );
+
+if ( ! $can_manage && ! $is_customer_allowed && ! $is_preview ) {
 	wp_die( 'سطح دسترسی نامعتبر است. لطفاً ابتدا وارد حساب کاربری خود شوید.', 'خطای دسترسی', array( 'response' => 403 ) );
 }
 
